@@ -1,27 +1,29 @@
-# DCグライドパス最適化：ICA2026再現コード
+# DC Glide-Path Optimisation: ICA2026 Reproducibility Code
 
-本リポジトリは、確定拠出年金（DC）の制約付き動的平均--分散最適化に関するICA2026論文の再現コード、主要な中間結果、および図表生成用データを公開するものです。
+This repository provides reproducibility code, key intermediate results, and figure-generation data for an ICA2026 paper on constrained dynamic mean–variance optimisation for defined contribution (DC) pension plans.
 
-## 対象モデル
+## Models covered
 
-- 事前コミットメント平均--分散（PCMV）
-- 動学的最適平均--分散（DOMV）
-- 定数リスク回避の時間整合的平均--分散（cTCMV）
-- 総年金富依存の時間整合的平均--分散（dTCMV）
-- 平均--分散--歪度（MVS）拡張
-- 厳密制約解と無制約クリップ近似の比較
+- Pre-commitment mean–variance (PCMV)
+- Dynamically optimal mean–variance (DOMV)
+- Time-consistent mean–variance with constant variance aversion (cTCMV)
+- Time-consistent mean–variance with total-pension-wealth-dependent variance aversion (dTCMV)
+- Mean–variance–skewness (MVS) extensions
+- Directly constrained controls versus clipped unconstrained approximations
 
-すべての主要計算は、空売りおよび将来拠出を担保とする借入を認めない制約
+All principal calculations impose the DC investment constraint
 
 ```text
 0 <= risky investment <= current DC balance
 ```
 
-の下で実行します。
+which rules out short selling and borrowing against future contributions.
 
-## 推奨環境
+The MVS calculations should be interpreted as research extensions. In particular, the equality between cTCMVS and cTCMV is established for the constant-coefficient unconstrained Black–Scholes case and is inherited by the corresponding clipped controls. It is not established for directly constrained controls.
 
-- Python 3.11 または 3.12
+## Recommended environment
+
+- Python 3.11 or 3.12
 - NumPy, pandas, Matplotlib, SciPy, Numba, Pillow
 
 ```bash
@@ -30,35 +32,35 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-日本語図を再生成する場合は、Noto Sans CJK JPをOSへインストールか、`fonts/NotoSansCJKjp-Regular.otf`へ配置してください。
+The bundled localisation script reproduces the Japanese-labelled paper figures. The numerical arrays, CSV files, and optimisation outputs are language-neutral and can be used to generate English-labelled figures separately.
 
-## 四つのMV解概念の検証（付録A.3）
+## Validation of the four MV solution concepts
 
-van Staden, Dang and Forsyth (2021) Table 5.1にはPCMV、DOMV、cTCMV、dTCMVの数値例が掲載されているため、四解概念すべてを外部再現の対象とします。本稿固有の制約付き月次実装については、独立前進分布、確率質量、境界量および入れ子格子を別途監査します。
+Appendix A.3 of the paper validates all four solution concepts because Table 5.1 of van Staden, Dang and Forsyth (2021) reports numerical examples for PCMV, DOMV, cTCMV, and dTCMV. The constrained monthly implementation developed for this paper is audited separately through independent forward propagation, probability-mass diagnostics, boundary diagnostics, and nested-grid checks.
 
 ```bash
 python validation/external_validation_vanstaden2021_all_mv.py
 python validation/run_all_validations.py
 ```
 
-検証結果は `results/validation/` に保存されます。現行参照版では次の全項目が通過しています。
+Validation outputs are stored in `results/validation/`. In the current reference version, all configured checks pass:
 
-- PCMV：外部58項目 + 内部7項目 = 65/65
-- DOMV：外部58項目 + 内部7項目 = 65/65
-- cTCMV：外部58項目 + 内部7項目 = 65/65
-- dTCMV：外部52項目 + 内部15項目 = 67/67
+- PCMV: 58 external checks + 7 internal checks = 65/65
+- DOMV: 58 external checks + 7 internal checks = 65/65
+- cTCMV: 58 external checks + 7 internal checks = 65/65
+- dTCMV: 52 external checks + 15 internal checks = 67/67
 
-PCMVはreflected lognormal閉形式、DOMVとcTCMVは正規終端分布の閉形式からTable 5.1を再計算します。dTCMVは未公表の時変係数経路を再現したとはせず、公表平均・標準偏差から対数正規終端分布を同定して残りの分布指標を再計算する、分布レベルの外部検証としています。詳細は [validation/README.md](validation/README.md) を参照してください。
+For PCMV, Table 5.1 is recomputed from the reflected-lognormal closed form. For DOMV and cTCMV, it is recomputed from the closed-form normal terminal distribution. For dTCMV, the published mean and standard deviation are used to identify the lognormal terminal distribution, from which the remaining distributional statistics are recomputed. This is a distribution-level external validation; it does not claim to reproduce the unpublished path of the time-varying coefficient. See [validation/README.md](validation/README.md) for details.
 
-## 主な実行順序
+## Main execution order
 
-完全な月次再計算は計算負荷が高いため、まず同梱済み配列から図を再生成する方法を推奨します。
+A complete monthly recomputation is computationally intensive. For a quick inspection, first regenerate the paper figures from the bundled CSV and NPZ files:
 
 ```bash
 python scripts/05_figures/localize_paper_figures_ja_20260717.py
 ```
 
-主要な再計算は次の順序です。
+The main recomputation sequence is:
 
 ```bash
 python scripts/01_solvers/pcmv_domv_solver_20260713.py
@@ -70,25 +72,30 @@ python scripts/01_solvers/dtcmv_mvs_solver_20260713.py
 python scripts/02_calibration/run_mvs_refined_calibration.py
 ```
 
-番号は作業の大まかな流れを表します。全スクリプトの役割と実行区分は [scripts/README.md](scripts/README.md) および [CODEBOOK_JA.md](CODEBOOK_JA.md) を参照してください。
+The directory numbers indicate the broad workflow rather than a strict dependency order. See [scripts/README.md](scripts/README.md) and [CODEBOOK.md](CODEBOOK.md) for the role and execution status of each script.
 
-## 四解概念の厳密制約解とクリップ近似
+## Directly constrained controls and clipped approximations
 
-年80分割の感応度分析では、PCMV、DOMV、cTCMV、dTCMVの全解概念について、制約付き問題を直接解いたフィードバックと、対応する無制約解析解を事後的に `0 <= pi <= x` へ射影したクリップ近似を比較します。
+The 80-step-per-horizon sensitivity analysis compares, for PCMV, DOMV, cTCMV, and dTCMV:
 
-- 実線：厳密制約フィードバック
-- 同色の点線：無制約解のクリップ近似
-- 両方策は、それぞれが生成する残高分布の下で独立に前進伝播
+- the feedback obtained by solving the constrained problem directly; and
+- the clipped approximation obtained by projecting the corresponding unconstrained solution onto `0 <= pi <= x`.
 
-![期待収益率感応度における全解概念の厳密解とクリップ解](supplementary/figures/fig_mu_sensitivity_glidepaths_N80.svg)
+In the figures:
 
-PCMVは固定ターゲット型の無制約解、DOMVは各時点再最適化型の無制約解、cTCMVは定数リスク回避型の解析解、dTCMVはVolterra方程式から得る時変係数を用いています。計算式と実装は [`add_all_clip_overlays_20260721.py`](scripts/04_sensitivity/add_all_clip_overlays_20260721.py)、全5図は [補足図ページ](supplementary/figures/README.md)、差分集計は [`all_strategies_strict_vs_clip_sensitivity_summary.csv`](results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv) を参照してください。
+- solid lines denote directly constrained feedback controls;
+- dashed lines of the same colour denote clipped unconstrained approximations; and
+- each policy is propagated forward under the wealth distribution that it generates itself.
 
-比較の結果、基準パラメータで差が小さい解概念があっても、パラメータ変更後に同様に近いとは限りません。特にPCMVおよびdTCMVでは、シナリオによって直接制約解とクリップ近似の差が大きくなります。
+![Directly constrained and clipped controls under expected-return sensitivity](supplementary/figures/fig_mu_sensitivity_glidepaths_N80.svg)
 
-## 最終稿で追加した診断
+The PCMV approximation uses its fixed-target unconstrained solution; DOMV uses the unconstrained solution associated with re-optimisation at each state; cTCMV uses the constant-variance-aversion analytical solution; and dTCMV uses the time-varying coefficient obtained from the Volterra equation. See [`add_all_clip_overlays_20260721.py`](scripts/04_sensitivity/add_all_clip_overlays_20260721.py) for the implementation, the [supplementary figures page](supplementary/figures/README.md) for all five figures, and [`all_strategies_strict_vs_clip_sensitivity_summary.csv`](results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv) for the numerical gap summary.
 
-Table 10のdTCMV U字型成因分解と、付録A.4の理論的射影領域・直接探索領域の一致診断は、`diagnostics/`で再計算できます。
+A small difference under the baseline parameters does not imply that the same approximation remains accurate after parameters change. In particular, PCMV and dTCMV show materially larger gaps between the directly constrained and clipped policies in some scenarios.
+
+## Additional diagnostics
+
+The dTCMV U-shaped glide-path decomposition reported in Table 10 and the supplementary cross-check between analytical projection regions and directly searched regions can be reproduced from `diagnostics/`:
 
 ```bash
 python diagnostics/additional_diagnostics.py
@@ -97,42 +104,42 @@ python diagnostics/recompute_crosscheck.py
 python diagnostics/pcmv_crosscheck.py
 ```
 
-実行順序と出力CSVの説明は [diagnostics/README.md](diagnostics/README.md) を参照してください。
+See [diagnostics/README.md](diagnostics/README.md) for the execution order and output CSV files.
 
-## ディレクトリ
+## Directory structure
 
-- `results/`: 論文の主要表、較正値、ローリング評価および方策配列
-- `results/validation/`: 四つのMV解概念の自動判定結果
-- `results/sensitivity/`: 全解概念の厳密解・クリップ近似の感応度差分
-- `validation/`: 付録A.3に対応する外部・内部妥当性検証
-- `diagnostics/`: Table 10のU字型分解および付録A.4の自由境界クロスチェック
-- `figs/`: 論文掲載図の日本語版と再生成に必要な原図
-- `supplementary/figures/`: 本文未掲載の補足図と各図の解説
-- `scripts/01_solvers/`: PCMV・DOMV・dTCMV--MVSの中核ソルバー
-- `scripts/02_calibration/`: 共通平均・MVS係数の較正
-- `scripts/03_rolling/`: ローリング条件付き評価と関連図
-- `scripts/04_sensitivity/`: 感応度分析と再集計
-- `scripts/05_figures/`: 論文図の再生成・日本語化
-- `scripts/90_workers/`: 分割実行用の補助ワーカー（通常は直接実行しません）
+- `results/`: principal paper tables, calibration values, rolling evaluations, and policy arrays
+- `results/validation/`: automated results for the four MV solution concepts
+- `results/sensitivity/`: sensitivity gaps between directly constrained and clipped controls
+- `validation/`: external and internal validation corresponding to Appendix A.3
+- `diagnostics/`: the Table 10 U-shape decomposition and supplementary free-boundary cross-checks
+- `figs/`: paper figures and source figures required for regeneration
+- `supplementary/figures/`: supplementary figures omitted from the main paper, with English explanations
+- `scripts/01_solvers/`: core PCMV, DOMV, and dTCMV–MVS solvers
+- `scripts/02_calibration/`: equal-mean and MVS-coefficient calibration
+- `scripts/03_rolling/`: rolling conditional evaluation and related figures
+- `scripts/04_sensitivity/`: sensitivity analysis and numerical diagnostics
+- `scripts/05_figures/`: paper-figure regeneration and localisation
+- `scripts/90_workers/`: auxiliary workers for split or parallel execution; normally not run directly
 
-## 本文未掲載の補足図
+## Supplementary figures
 
-感応度分析、制約診断、ローリング評価およびMVS詳細図を、[補足図ページ](supplementary/figures/README.md) にまとめています。各図の直下に日本語の説明を掲載しています。
+Sensitivity analysis, constraint diagnostics, rolling conditional evaluation, and detailed MVS figures are collected on the [supplementary figures page](supplementary/figures/README.md). Each figure is followed by an English explanation.
 
-## 再現性上の注意
+## Reproducibility notes
 
-- `monthly_D0_policy_arrays.npz`は、40年・月次（480期）の基準計算から得た方策・分布配列です。
-- 感応度図は年80分割のスクリーニング計算です。実線と点線は同一状態分布上の単純比較ではなく、各方策の自己生成分布に基づくグライドパスです。
-- `numerical_diagnostics_20260718.py`は、正規化前質量、上下端超過量、後退・前進モーメント整合性、およびdTCMV上端格子感応度を再計算します。
-- 基準格子 `x_max=300` のdTCMVは右裾統計に上端感応度があるため、尾部の妥当性は `x_max=900` 以上の入れ子格子で判定します。
-- MVSの正の歪度係数に関する結果は、非凹性と離散化依存性を伴う探索的結果です。
-- 付属配列からの作図は高速ですが、ソルバーからの完全再計算にはCPU時間とメモリを要します。
-- 論文中の数値は、対応するCSV/NPZを正本として照合してください。
+- `monthly_D0_policy_arrays.npz` contains policy and distribution arrays from the 40-year monthly baseline with 480 time steps.
+- The sensitivity figures use an 80-step screening calculation. The solid and dashed glide paths are not evaluated under a common state distribution; each is based on the wealth distribution generated by its own policy.
+- `numerical_diagnostics_20260718.py` recomputes pre-normalisation mass, lower- and upper-bound overflow, backward–forward moment consistency, and dTCMV upper-domain sensitivity.
+- Because the dTCMV right-tail statistics on the baseline domain `x_max=300` are sensitive to the upper boundary, tail validity is assessed on nested grids with `x_max=900` or larger.
+- Results with a positive MVS skewness coefficient are exploratory and may depend on non-concavity and discretisation.
+- Figure generation from the bundled arrays is fast, but a complete recomputation from the solvers requires substantial CPU time and memory.
+- The CSV and NPZ files corresponding to each reported result should be treated as the numerical source of record.
 
 ## Citation
 
-このコードを利用する場合は、公開後のICA2026論文と本リポジトリのリリースを引用してください。書誌情報は採択・公開後に更新します。
+When using this code, please cite the ICA2026 paper and the repository release after publication. Full bibliographic information will be added once the paper has been accepted and published.
 
-## License
+## Licence
 
-MIT License。詳細は [LICENSE](LICENSE) を参照してください。
+MIT License. See [LICENSE](LICENSE) for details.
