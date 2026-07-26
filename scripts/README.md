@@ -1,57 +1,59 @@
-# Pythonコード案内
+# Python Code Guide
 
-Pythonコードは役割ごとに番号付きフォルダへ整理しています。番号は厳密な依存順ではなく、再現作業を読むときの大まかな順序です。コマンドはリポジトリのルートで実行してください。
+The Python code is organised into numbered directories by purpose. The numbers indicate a broad reading and reproduction workflow rather than a strict dependency order. Run the commands from the repository root.
 
-## まず試す場合
+## Quick start
 
-同梱済みのCSV/NPZから論文図を再生成します。完全な月次最適化より短時間で確認できます。
+Regenerate the paper figures from the bundled CSV and NPZ files. This is much faster than rerunning the full monthly optimisation.
 
 ```bash
 python scripts/05_figures/localize_paper_figures_ja_20260717.py
 ```
 
-## 01_solvers：中核ソルバー
+The script name retains the `_ja_` suffix because it reproduces the Japanese-labelled figures used in the Japanese manuscript. The underlying numerical outputs are language-neutral.
 
-| ファイル | 役割 |
+## 01_solvers: core solvers
+
+| File | Purpose |
 | --- | --- |
-| `pcmv_domv_solver_20260713.py` | PCMV・DOMVの制約付きソルバー |
-| `dtcmv_mvs_solver_20260713.py` | dTCMV--MVSのモーメント後退計算 |
+| `pcmv_domv_solver_20260713.py` | Directly constrained solvers for PCMV and DOMV |
+| `dtcmv_mvs_solver_20260713.py` | Backward moment recursion for dTCMV–MVS |
 
-## 02_calibration：較正
+## 02_calibration: calibration
 
-| ファイル | 役割 |
+| File | Purpose |
 | --- | --- |
-| `equal_mean_calibration_20260713.py` | 共通平均比較用の較正値を整理 |
-| `run_mvs_refined_calibration.py` | MVS係数の精緻較正 |
+| `equal_mean_calibration_20260713.py` | Organises calibration values for equal-mean comparisons |
+| `run_mvs_refined_calibration.py` | Performs refined calibration of the MVS coefficients |
 
-## 03_rolling：ローリング評価
+## 03_rolling: rolling conditional evaluation
 
-| ファイル | 役割 |
+| File | Purpose |
 | --- | --- |
-| `recompute_d0_rolling.py` | 基準ケース、終端分布、ローリング評価を再計算 |
-| `detailed_dtcmv_rolling_overlay_20260713.py` | 残高分位点別のローリング評価 |
-| `make_common_state_rolling_figure_20260713.py` | 共通状態ローリング比較図を生成 |
-| `rebuild_rolling_equal_mean.py` | 共通平均較正のローリング結果を再構築 |
+| `recompute_d0_rolling.py` | Recomputes the baseline case, terminal distributions, and rolling conditional evaluations |
+| `detailed_dtcmv_rolling_overlay_20260713.py` | Produces dTCMV rolling evaluations by wealth quantile |
+| `make_common_state_rolling_figure_20260713.py` | Generates the common-state rolling comparison figure |
+| `rebuild_rolling_equal_mean.py` | Reconstructs rolling results under equal-mean calibration |
 
-## 04_sensitivity：感応度分析
+## 04_sensitivity: sensitivity analysis
 
-| ファイル | 役割 |
+| File | Purpose |
 | --- | --- |
-| `low_balance_refined_sensitivity_20260714.py` | 低残高領域を精緻化した厳密制約解の感応度分析 |
-| `add_all_clip_overlays_20260721.py` | PCMV・DOMV・cTCMV・dTCMVの全パネルに、厳密制約解（実線）と対応する無制約クリップ近似（同色点線）を重ね、差分CSV/NPZを出力 |
-| `add_ctcmv_clip_overlays_20260721.py` | cTCMVだけを対象とした旧補助スクリプト。全解概念の比較には上記スクリプトを使用 |
-| `rebuild_baseline_sensitivity.py` | 基準ケースと感応度結果を再集計 |
-| `numerical_diagnostics_20260718.py` | モーメント整合性、正規化前質量、境界超過量、dTCMV上端格子感応度を再計算 |
+| `low_balance_refined_sensitivity_20260714.py` | Sensitivity analysis of directly constrained solutions with a refined low-wealth grid |
+| `add_all_clip_overlays_20260721.py` | Adds the directly constrained solution (solid line) and the corresponding clipped unconstrained approximation (same-colour dashed line) to all PCMV, DOMV, cTCMV, and dTCMV panels, and exports gap CSV/NPZ files |
+| `add_ctcmv_clip_overlays_20260721.py` | Older auxiliary script restricted to cTCMV; use the preceding script for comparisons across all solution concepts |
+| `rebuild_baseline_sensitivity.py` | Reaggregates the baseline and sensitivity results |
+| `numerical_diagnostics_20260718.py` | Recomputes moment consistency, pre-normalisation mass, boundary overflow, and dTCMV upper-domain sensitivity |
 
-全解概念のクリップ近似を含む感応度図は次で再生成します。
+Regenerate the sensitivity figures containing clipped approximations for all solution concepts with:
 
 ```bash
 python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir d0_sensitivity_outputs
 ```
 
-各パネルでは、同じ市場・拠出シナリオの色を維持し、実線を厳密制約フィードバック、点線を対応する無制約解析解のクリップ近似として表示します。PCMV、DOMV、cTCMV、dTCMVの各無制約解は同一式を流用せず、それぞれの解概念に対応する式から構成します。両方策はそれぞれ自ら生成する残高分布で前進伝播します。
+Within each panel, colours are held fixed for the same market and contribution scenario. Solid lines denote directly constrained feedback controls and dashed lines denote the clipped approximation constructed from the corresponding unconstrained solution. The PCMV, DOMV, cTCMV, and dTCMV approximations are derived from their own solution concepts rather than from one common formula. Each policy is propagated forward under the wealth distribution that it generates itself.
 
-主な出力は次のとおりです。
+Principal outputs include:
 
 - `figs/fig_D_sensitivity_glidepaths_N80.png` / `figs/fig_D_sensitivity_glidepaths_N80.svg`
 - `figs/fig_r_sensitivity_glidepaths_N80.png` / `figs/fig_r_sensitivity_glidepaths_N80.svg`
@@ -62,18 +64,18 @@ python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir d0_
 - `all_strategies_strict_vs_clip_sensitivity_paths.csv`
 - `all_strategies_strict_vs_clip_sensitivity_glidepaths.npz`
 
-## 05_figures：出力・作図
+## 05_figures: output reconstruction and plotting
 
-| ファイル | 役割 |
+| File | Purpose |
 | --- | --- |
-| `rebuild_all_corrected_glide_outputs.py` | 修正済みグライドパス・分布出力を一括再構築 |
-| `localize_paper_figures_ja_20260717.py` | 論文図を日本語で再生成 |
+| `rebuild_all_corrected_glide_outputs.py` | Reconstructs the corrected glide-path and distribution outputs in one run |
+| `localize_paper_figures_ja_20260717.py` | Regenerates the Japanese-labelled paper figures |
 
-## 90_workers：補助ワーカー
+## 90_workers: auxiliary workers
 
-`mvs_worker.py`と`sensitivity_worker.py`は分割実行用です。通常は直接実行しません。
+`mvs_worker.py` and `sensitivity_worker.py` support split or parallel execution. They are not normally run directly.
 
-## 主要な再計算順序
+## Main recomputation sequence
 
 ```bash
 python scripts/01_solvers/pcmv_domv_solver_20260713.py
@@ -84,4 +86,4 @@ python scripts/01_solvers/dtcmv_mvs_solver_20260713.py
 python scripts/02_calibration/run_mvs_refined_calibration.py
 ```
 
-各スクリプトは移動後も、リポジトリ直下の `results/` と `figs/` を参照します。
+After reorganisation, all scripts continue to read from and write to the repository-level `results/` and `figs/` directories.
