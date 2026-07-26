@@ -1,135 +1,135 @@
-# 本文未掲載の補足図
+# Supplementary Figures Omitted from the Main Paper
 
-本ページには、ICA2026論文のページ制約により最終本文から外した図を収録しています。削減前の完全版原稿で実際に採用していた図だけを対象とし、内部テスト図、旧版図および重複図は除外しました。
+This page collects figures omitted from the final ICA2026 paper because of the page limit. It includes only figures that were used in the longer pre-reduction manuscript; internal test figures, superseded versions, and duplicates are excluded.
 
-感応度分析は年80分割のスクリーニング計算、基準ケースと制約診断は月次480分割の計算です。MVS結果は、非凹性、離散化および較正に依存する探索的結果であり、特定のレジーム閾値を確定するものではありません。
+The sensitivity analysis uses an 80-step screening calculation over the horizon, whereas the baseline case and constraint diagnostics use the monthly 480-step calculation. The MVS results are exploratory because they depend on non-concavity, discretisation, and calibration. They should not be interpreted as establishing fixed regime thresholds.
 
-## 1. 終端分布と制約診断
+## 1. Terminal distributions and constraint diagnostics
 
-### 1.1 各戦略の終端富密度
+### 1.1 Terminal-wealth density by strategy
 
-![各戦略の終端富密度](./fig_all_strategies_terminal_density_D0_N480.png)
+![Terminal-wealth density by strategy](./fig_all_strategies_terminal_density_D0_N480.png)
 
-共通平均較正後の終端富分布を密度で比較しています。PCMVはターゲット近傍への集中が強く、分布中央の鋭い山として現れます。一方、dTCMVは分布が広く、右裾への参加を残す形です。CDFだけでは見えにくい「どこに確率質量が集中しているか」を確認するための補足図です。右端の小さな山には上端格子への確率質量が含まれるため、裾の絶対水準は境界診断と併せて解釈する必要があります。
+This figure compares terminal-wealth densities after equal-mean calibration. PCMV concentrates strongly around its target and therefore produces a sharp central peak. The dTCMV distribution is wider and retains greater participation in the right tail. The density complements the CDF by showing where probability mass is concentrated. Because the small peak at the right edge includes mass assigned to the upper grid boundary, the absolute tail level should be interpreted together with the boundary diagnostics.
 
-### 1.2 上限制約が拘束する確率質量
+### 1.2 Probability mass at the upper investment constraint
 
-![上限制約が拘束する確率質量](./fig_all_strategies_upper_binding_D0_N480.png)
+![Probability mass at the upper investment constraint](./fig_all_strategies_upper_binding_D0_N480.png)
 
-各時点で、リスク資産投資額の上限制約、すなわち現在のDC残高を全額リスク資産へ投資する条件が拘束する確率質量を示します。加入初期は将来拠出に比べて現在残高が小さいため、複数の最適戦略で上限制約が拘束しやすくなります。dTCMVでは中間期間の拘束確率が急速に低下する一方、退職直前には状態依存的に再上昇します。これは単純な年齢依存の右下がり運用ではないことを示しています。
+At each date, this figure reports the probability mass for which the upper risky-investment constraint binds, meaning that the entire current DC balance is invested in the risky asset. Early in membership, the current account balance is small relative to future contributions, so the upper constraint binds frequently under several optimal strategies. For dTCMV, the binding probability falls rapidly during the middle years but rises again in a state-dependent manner near retirement. This is inconsistent with a simple age-only declining glide path.
 
-### 1.3 上限制約の自由境界
+### 1.3 Free boundary of the upper constraint
 
-![上限制約の自由境界](./fig_all_strategies_free_boundaries_D0_N480.png)
+![Free boundary of the upper constraint](./fig_all_strategies_free_boundaries_D0_N480.png)
 
-全額リスク資産が選択される領域と内部解の領域を分ける数値的自由境界を、代表時点ごとに示します。PCMVの境界は満期へ向けて上昇し、DOMVはおおむね一定水準で推移します。cTCMVの境界も時間とともに上昇しますが、dTCMVの上限制約領域は主として低残高側に限定されます。dTCMVがリスクを取らないという意味ではなく、内部領域では総年金富に応じてリスク配分を変えることを意味します。
+The figure shows, at representative dates, the numerical free boundary separating the all-risky region from the interior-control region. The PCMV boundary rises towards maturity, whereas the DOMV boundary remains broadly stable. The cTCMV boundary also rises over time. Under dTCMV, the upper-constraint region is mainly confined to low account balances. This does not mean that dTCMV avoids risk; within the interior region, it adjusts risky investment according to total pension wealth.
 
-### 1.4 時点別の射影誤差
+### 1.4 Projection gap by date
 
-![時点別の射影誤差](./fig_tcmv_projection_gap_by_time_N480.png)
+![Projection gap by date](./fig_tcmv_projection_gap_by_time_N480.png)
 
-cTCMVおよびdTCMVについて、制約付き問題を直接解いた厳密解と、無制約解を事後的に区間へクリップした近似との差を確率質量で加重しています。dTCMVでは加入初期から中期にかけて差が大きく、単純なクリップが状態依存の自由境界を十分に再現しない期間があります。退職時点へ近づくと差は縮小しますが、クリップ近似を厳密解と同一視できることを意味するものではありません。
+For cTCMV and dTCMV, the figure probability-weights the difference between the directly constrained solution and the clipped approximation obtained by projecting the unconstrained solution onto the feasible interval. The dTCMV gap is material from the early to middle years, indicating periods in which simple clipping does not adequately reproduce the state-dependent free boundary. The gap narrows near retirement, but this does not imply that clipping and direct constrained optimisation are theoretically identical.
 
-## 2. ローリング条件付き評価
+## 2. Rolling conditional evaluation
 
-### 2.1 全戦略のローリング評価
+### 2.1 Rolling conditional evaluation across all strategies
 
-![全戦略のローリング条件付き評価](./fig_rolling_conditional_all_strategies_D0_N480.png)
+![Rolling conditional evaluation across all strategies](./fig_rolling_conditional_all_strategies_D0_N480.png)
 
-各戦略が自ら生成する中位残高状態を新たな開始点とし、その時点から同じフィードバックを継続した場合の条件付き終端平均、条件付き標準偏差および現在のリスク資産比率を示します。PCMV、DOMVおよびcTCMVでは、残存期間の短縮に伴ってリスク量がおおむね低下します。dTCMVは中間時点でリスク比率を落とした後、実現残高と残存期間に応じて退職前に再び引き上げます。この挙動が、dTCMVを単純な年齢依存グライドパスと区別します。
+For each strategy, the median wealth state generated by that strategy is used as a new starting point. The figure reports the conditional terminal mean, conditional standard deviation, and current risky-asset proportion obtained by continuing the same feedback control from that state. Under PCMV, DOMV, and cTCMV, risk-taking generally declines as the remaining horizon shortens. dTCMV reduces its risky proportion during the middle years and then raises it again near retirement depending on realised wealth and time remaining. This behaviour distinguishes dTCMV from a simple age-dependent glide path.
 
-## 3. グライドパスの感応度分析
+## 3. Glide-path sensitivity analysis
 
-以下の5図は、低残高領域を細かくした格子を用いる年80分割のスクリーニング分析です。各パネルで、**実線は制約付き問題を直接解いた厳密制約フィードバック、同色の点線は対応する無制約解析解を `0 <= pi <= x` へ射影したクリップ近似**を表します。PCMV、DOMV、cTCMV、dTCMVはいずれも、それぞれが生成する残高分布の下で独立に前進伝播しています。結果の方向性と頑健性を確認するための補足資料であり、包括的な格子収束証明ではありません。
+The following five figures are based on an 80-step screening calculation with additional resolution in the low-wealth region. In every panel, **solid lines denote feedback controls obtained by solving the constrained problem directly, while dashed lines of the same colour denote the clipped approximation obtained by projecting the corresponding unconstrained solution onto `0 <= pi <= x`**. PCMV, DOMV, cTCMV, and dTCMV are each propagated under the wealth distribution generated by their own policy. These figures assess direction and robustness; they do not constitute a complete grid-convergence proof.
 
-### 3.1 DB給付 \(D_T\) に対する感応度
+### 3.1 Sensitivity to the deterministic DB benefit \(D_T\)
 
-![DB給付に対する感応度](./fig_D_sensitivity_glidepaths_N80.svg)
+![Sensitivity to the deterministic DB benefit](./fig_D_sensitivity_glidepaths_N80.svg)
 
-PCMV、DOMVおよびcTCMVの厳密制約解では、確定的なDB給付を加えてもDC部分の最適グライドパスはほぼ重なります。これらの問題では、確定的給付が目的関数の定数項または平行移動として作用するためです。dTCMVではDB給付が有効なリスク回避度に影響し、厳密解とクリップ近似の双方が変化します。特にdTCMVでは、単純な事後射影が直接制約解の状態依存境界を再現しないことが確認できます。
+For the directly constrained PCMV, DOMV, and cTCMV problems, adding a deterministic DB benefit leaves the optimal glide path for the DC component almost unchanged. In these problems, the deterministic benefit enters the objective as a constant or location shift. For dTCMV, however, the DB benefit changes effective variance aversion, so both the directly constrained solution and the clipped approximation change. In particular, simple ex-post projection does not reproduce the state-dependent boundary of the directly constrained dTCMV problem.
 
-### 3.2 安全利子率 \(r\) に対する感応度
+### 3.2 Sensitivity to the risk-free rate \(r\)
 
-![安全利子率に対する感応度](./fig_r_sensitivity_glidepaths_N80.svg)
+![Sensitivity to the risk-free rate](./fig_r_sensitivity_glidepaths_N80.svg)
 
-基準値は \(r=0.015\) です。安全利子率が高いほど、安全資産のみでも将来富を積み上げやすくなるため、各厳密制約解のリスク資産比率は全般に低下します。一方、クリップ近似との距離は一様ではありません。PCMVとDOMVでは無制約ターゲットまたは再最適化係数の時間依存性が変わり、dTCMVではVolterra係数と人的資本の双方が変化するため、パラメータごとに乖離の大きさも変わります。
+The baseline value is \(r=0.015\). A higher risk-free rate makes it easier to accumulate future wealth through the safe asset alone, so risky-asset proportions generally decline under the directly constrained policies. The distance from the clipped approximation does not change uniformly. For PCMV and DOMV, the time dependence of the unconstrained target or re-optimisation coefficient changes. For dTCMV, both the Volterra coefficient and the present value of future contributions change. The approximation gap therefore varies by parameter scenario.
 
-### 3.3 リスク資産期待収益率 \(\mu\) に対する感応度
+### 3.3 Sensitivity to the expected risky return \(\mu\)
 
-![期待収益率に対する感応度](./fig_mu_sensitivity_glidepaths_N80.svg)
+![Sensitivity to the expected risky return](./fig_mu_sensitivity_glidepaths_N80.svg)
 
-基準値は \(\mu=0.055\) です。期待超過収益が高くなるほど、各解概念でリスク資産を保有する便益が高まります。ただし、PCMVでは無制約固定ターゲット解のクリップと直接制約解の差が終盤に拡大し、dTCMVでも加入初期から中期に差が残ります。cTCMVの基準ケースで両者が近いことは、他の解概念や他の期待収益率でも一般に成立する性質ではありません。
+The baseline value is \(\mu=0.055\). A higher expected excess return increases the benefit of holding the risky asset under every solution concept. Under PCMV, the gap between the clipped fixed-target unconstrained policy and the directly constrained policy widens late in the horizon. Under dTCMV, a material gap remains from the early to middle years. The close agreement observed for cTCMV in the baseline case is therefore not a general property of other solution concepts or other expected-return assumptions.
 
-### 3.4 リスク資産ボラティリティ \(\sigma\) に対する感応度
+### 3.4 Sensitivity to risky-asset volatility \(\sigma\)
 
-![ボラティリティに対する感応度](./fig_sigma_sensitivity_glidepaths_N80.svg)
+![Sensitivity to risky-asset volatility](./fig_sigma_sensitivity_glidepaths_N80.svg)
 
-基準値は \(\sigma=0.18\) です。ボラティリティの上昇は分散費用を高めるため、各戦略のリスク資産比率をおおむね低下させます。cTCMVでは厳密解とクリップ近似が比較的近いシナリオもありますが、PCMV、DOMVおよびdTCMVでは差が残ります。とくにdTCMVでは中間期間の谷と退職前の再上昇が直接制約解に現れ、単純なクリップとは形状自体が異なります。
+The baseline value is \(\sigma=0.18\). Higher volatility increases the variance cost and therefore generally lowers risky-asset proportions. Some cTCMV scenarios show relatively close directly constrained and clipped paths, but gaps remain for PCMV, DOMV, and dTCMV. In particular, the directly constrained dTCMV policy retains a middle-period trough and a pre-retirement increase, so its shape can differ from the clipped approximation rather than merely its level.
 
-### 3.5 拠出プロファイルに対する感応度
+### 3.5 Sensitivity to the contribution profile
 
-![拠出プロファイルに対する感応度](./fig_contrib_profile_sensitivity_glidepaths_N80.svg)
+![Sensitivity to the contribution profile](./fig_contrib_profile_sensitivity_glidepaths_N80.svg)
 
-総拠出額を同一に保ち、一定拠出、線形増加および二次的増加を比較しています。拠出を後半へ寄せるほど、加入初期の人的資本、すなわち将来拠出の現在価値が大きくなるため、初期から中期のリスク資産比率が高くなります。cTCMV以外では、拠出時期の変更が厳密制約解とクリップ近似の差にも影響します。総拠出額だけでなく拠出の時期と境界処理の相互作用も最適グライドパスを左右します。
+The comparison holds total contributions fixed and considers constant, linearly increasing, and quadratically increasing contribution profiles. Shifting contributions towards later years increases early human capital, defined here as the present value of future contributions, and therefore raises risky-asset proportions during the early and middle years. Except in the cTCMV cases where the paths are particularly close, changing the timing of contributions also changes the gap between directly constrained and clipped controls. The optimal glide path therefore depends not only on total contributions but also on the interaction between contribution timing and the state-dependent boundary.
 
-差分の数値集計は [`results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv`](../../results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv) に保存しています。全時点の経路CSVとNPZ配列は、同じスクリプトを実行すると出力ディレクトリへ生成されます。
+The numerical gap summary is stored in [`results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv`](../../results/sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv). Running the same script also generates full-path CSV and NPZ files in the selected output directory.
 
-## 4. PCMV--MVS・DOMV--MVSの探索的結果
+## 4. Exploratory PCMV–MVS and DOMV–MVS results
 
-### 4.1 再較正後のグライドパス
+### 4.1 Glide paths after recalibration
 
-![PCMV--MVSとDOMV--MVSのグライドパス](./fig_pcmv_domv_mvs_recalibrated_N80_glidepaths.png)
+![Recalibrated PCMV–MVS and DOMV–MVS glide paths](./fig_pcmv_domv_mvs_recalibrated_N80_glidepaths.png)
 
-歪度係数 \(\eta_0\) を変化させたPCMV--MVSとDOMV--MVSのグライドパスです。小さい係数ではMV解とほぼ重なりますが、係数が一定水準を超えるとPCMV--MVSのリスク取得時期が大きく変わります。DOMV--MVSの変化は相対的に小さいものの、終盤には離散化に伴う変動も見られます。
+The figure shows PCMV–MVS and DOMV–MVS glide paths as the skewness coefficient \(\eta_0\) changes. At small coefficient values, the paths nearly coincide with their MV counterparts. Beyond an intermediate range, the timing of PCMV–MVS risk-taking changes materially. The DOMV–MVS response is smaller, although discretisation-related variation appears near the end of the horizon.
 
-### 4.2 再較正後の終端CDF
+### 4.2 Terminal CDFs after recalibration
 
-![PCMV--MVSとDOMV--MVSの終端CDF](./fig_pcmv_domv_mvs_recalibrated_N80_terminal_cdf.png)
+![Recalibrated PCMV–MVS and DOMV–MVS terminal CDFs](./fig_pcmv_domv_mvs_recalibrated_N80_terminal_cdf.png)
 
-小さい歪度係数では終端CDFもMV基準とほぼ一致します。係数を大きくすると、特にPCMV--MVSで分布形状の変化が現れます。ただし、中心部分のCDFが近く見えても、第三モーメントは極端な上方裾に強く反応するため、分布全体が同一であるとは限りません。
+At small skewness coefficients, the terminal CDFs also remain close to the MV baseline. As the coefficient increases, the distribution changes most visibly under PCMV–MVS. Even where the central portions of two CDFs appear close, the third moment can react strongly to the extreme upper tail, so visual similarity around the centre does not imply equality of the full distributions.
 
-### 4.3 MVS係数に対する非線形応答
+### 4.3 Nonlinear response to the MVS coefficient
 
-![MVS係数に対する非線形応答](./fig_pcmv_domv_mvs_recalibrated_N80_regime.png)
+![Nonlinear response to the MVS coefficient](./fig_pcmv_domv_mvs_recalibrated_N80_regime.png)
 
-平均、標準偏差および歪度の \(\eta_0\) に対する応答をまとめています。小さい係数では変化が限定的ですが、中程度以上では平均・標準偏差・歪度が非線形に変化し、数値的なレジーム転換が観察されます。この閾値は制御格子、状態格子、ターゲット探索および補間に依存し得るため、実務上の確定値ではなく探索的な結果として解釈します。
+This figure summarises the response of the mean, standard deviation, and skewness to \(\eta_0\). Changes are limited for small coefficients, but at moderate and larger values the three statistics respond nonlinearly and a numerical regime change appears. The location of this transition may depend on the control grid, state grid, target search, and interpolation. It should therefore be interpreted as an exploratory numerical finding rather than a definitive practical threshold.
 
-## 5. dTCMV--MVSの詳細
+## 5. Detailed dTCMV–MVS results
 
-### 5.1 分散回避係数を固定したグライドパス
+### 5.1 Glide paths with fixed variance aversion
 
-![固定係数下のdTCMV--MVSグライドパス](./fig_dtcmv_mvs_fixed_gamma_glidepaths.png)
+![dTCMV–MVS glide paths with fixed variance aversion](./fig_dtcmv_mvs_fixed_gamma_glidepaths.png)
 
-分散回避係数 \(\gamma_0=2.5\) を固定し、歪度係数だけを変化させています。歪度選好を強めると、単に全期間のリスク比率が上がるのではなく、リスクを取る時期が後方へ移動し、中間期間の谷と退職前の再上昇が組み替わります。
+The variance-aversion coefficient is fixed at \(\gamma_0=2.5\), while only the skewness coefficient changes. Stronger skewness preference does not simply raise the risky proportion throughout the horizon. Instead, it shifts the timing of risk-taking, reorganising the middle-period trough and the increase near retirement.
 
-### 5.2 共通平均較正後のグライドパス
+### 5.2 Glide paths after equal-mean calibration
 
-![共通平均較正後のdTCMV--MVSグライドパス](./fig_dtcmv_mvs_equal_mean_glidepaths.png)
+![dTCMV–MVS glide paths after equal-mean calibration](./fig_dtcmv_mvs_equal_mean_glidepaths.png)
 
-各MVS戦略の平均終端富をMV基準へそろえるように分散回避係数を再較正した比較です。平均水準を固定してもグライドパスは一致せず、MVS係数に応じてリスク取得時期が変化します。したがって、MVSの効果は平均の上昇だけでは説明できません。
+For each MVS strategy, the variance-aversion coefficient is recalibrated so that mean terminal wealth matches the MV baseline. The glide paths remain different even after the mean is held fixed, and the timing of risk-taking changes with the MVS coefficient. The MVS effect therefore cannot be explained solely by a higher expected terminal wealth.
 
-### 5.3 共通平均較正後の終端CDF
+### 5.3 Terminal CDFs after equal-mean calibration
 
-![共通平均較正後の終端CDF](./fig_dtcmv_mvs_equal_mean_cdf.png)
+![dTCMV–MVS terminal CDFs after equal-mean calibration](./fig_dtcmv_mvs_equal_mean_cdf.png)
 
-平均をそろえた場合の終端CDFです。分布中央では曲線が近い一方、下方・上方の裾で差が残ります。平均が同じでも、分散、下方リスク、上方参加および歪度の組合せが異なることを示しています。
+These are terminal CDFs after equalising the mean. The curves are close around the centre of the distribution, but differences remain in both tails. Strategies with the same mean can therefore have different combinations of variance, downside risk, upside participation, and skewness.
 
-### 5.4 下方・上方裾のフロンティア
+### 5.4 Downside–upside tail frontier
 
-![dTCMV--MVSの裾リスクフロンティア](./fig_dtcmv_mvs_tail_frontier.png)
+![dTCMV–MVS tail-risk frontier](./fig_dtcmv_mvs_tail_frontier.png)
 
-横軸は下方5%のCVaR、縦軸は上方5%の条件付き平均です。中程度の歪度係数では下方リスクを改善しながら上方裾がいったん抑制され、さらに係数を高めると右裾参加が再び強まります。歪度選好の強化が単調な「高リスク・高リターン化」ではなく、裾の配分を非線形に変えることを示します。
+The horizontal axis is lower-tail 5% CVaR and the vertical axis is the conditional mean of the upper 5% tail. At moderate skewness coefficients, downside risk improves while the upper tail is initially compressed. At larger coefficients, participation in the right tail strengthens again. Increasing skewness preference therefore changes tail allocation nonlinearly rather than producing a monotone shift towards a uniformly higher-risk, higher-return policy.
 
-### 5.5 ローリング条件付き指標
+### 5.5 Rolling conditional metrics
 
-![dTCMV--MVSのローリング条件付き指標](./fig_dtcmv_mvs_rolling_metrics.png)
+![dTCMV–MVS rolling conditional metrics](./fig_dtcmv_mvs_rolling_metrics.png)
 
-20年時点と35年時点の中位残高状態から再評価した条件付き平均、条件付き標準偏差および現在のリスク資産比率です。歪度係数を高めると、両時点で条件付き標準偏差と現在のリスク比率が低下する場合があります。MVSが一律に積極化するのではなく、全期間の右裾形成と将来時点のリスク抑制を組み合わせることを示しています。
+The figure reports the conditional mean, conditional standard deviation, and current risky-asset proportion when the strategy is re-evaluated from the median wealth state at years 20 and 35. Increasing the skewness coefficient can lower both the conditional standard deviation and the current risky proportion at these dates. MVS does not necessarily make the strategy uniformly more aggressive; it can combine right-tail formation over the full horizon with lower prospective risk at later intermediate states.
 
-## 解釈上の共通注意
+## Common interpretation cautions
 
-- 感応度図は年80分割のスクリーニング結果であり、基準ケースの月次480分割結果とは時間格子が異なります。
-- 厳密制約解とクリップ近似は別の解です。両者が近い図でも、理論上同一であることを意味しません。
-- クリップ近似は各解概念に対応する無制約解を射影したものであり、PCMV、DOMV、cTCMV、dTCMVに同じ式を一律適用したものではありません。
-- MVSは三次モーメントを含むため非凹性を伴い、極端な上方裾、格子幅、制御候補および補間に敏感です。
-- 図中のレジーム転換や数値閾値は探索的結果であり、包括的な収束分析を経た実務較正値ではありません。
+- The sensitivity figures use an 80-step screening calculation, whereas the monthly baseline uses 480 steps.
+- Directly constrained controls and clipped approximations are different solutions. Close plotted paths do not imply theoretical equality.
+- Each clipped approximation projects the unconstrained solution corresponding to its own solution concept; one common formula is not imposed on PCMV, DOMV, cTCMV, and dTCMV.
+- Because MVS includes a third-moment term, the objective can be non-concave and sensitive to the extreme upper tail, grid spacing, control candidates, and interpolation.
+- Numerical regime changes and threshold values shown in the figures are exploratory. They are not practical calibration values supported by a comprehensive convergence analysis.
