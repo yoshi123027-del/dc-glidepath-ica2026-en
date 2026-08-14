@@ -13,10 +13,10 @@
     "sigma": 0.18,
     "c": 1.0,
     "D": 0.0,
-    "gamma0": 2.5,
+    "gamma0": 1.193359375,
     "eta0": 0.0
   },
-  "target_mean": 70.34481587580456,
+  "target_mean": 84.47451441224628,
   "fixed_eta_grid": [
     0.0,
     0.5,
@@ -31,10 +31,20 @@
     8.0
   ],
   "gamma_calibrated": [
-    2.5,
-    2.9477203369140623,
-    3.3717025756835937,
-    4.1007080078125,
-    5.19421615600586
-  ]
+    1.193359375,
+    2.496286010742187,
+    3.054478454589843,
+    3.7316299438476563,
+    4.698553466796875
+  ],
+  "baseline_dtcmv_gamma0": 1.193359375,
+  "baseline_dtcmv_gamma0_source": "results/equal_mean_calibration.csv",
+  "eta0_zero_nesting_diagnostics": {
+    "mv_nesting_mean_abs_glide_gap": 0.008289798188119972,
+    "mv_nesting_max_abs_glide_gap": 0.038346345189267106,
+    "mv_nesting_final_glide_gap": -0.001753327973930352,
+    "mv_saved_final_glide": 0.9974263752050099,
+    "mvs_eta0_final_glide": 0.9956730472310795
+  },
+  "historical_solver_retained": "scripts/01_solvers/dtcmv_mvs_solver_20260713.py"
 }
