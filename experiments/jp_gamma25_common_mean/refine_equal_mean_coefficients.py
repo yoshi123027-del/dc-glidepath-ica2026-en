@@ -18,11 +18,12 @@ import dtcmv_mvs_solver_20260713 as mvs
 base_mvs = mvs.solve_case(replace(mvs.Config(), gamma0=2.5, eta0=0.0))
 TARGET = float(base_mvs["stats"]["mean"])
 
-# Production monthly MV implementation used in Section 6.
+# Production monthly MV implementation used in Section 6.  The module name is
+# deliberately kept as rollmod because Numba's on-disk cache records it.
 roll_path = ROOT / "scripts" / "03_rolling" / "recompute_d0_rolling.py"
-spec = importlib.util.spec_from_file_location("roll_refine", roll_path)
+spec = importlib.util.spec_from_file_location("rollmod", roll_path)
 roll = importlib.util.module_from_spec(spec)
-sys.modules["roll_refine"] = roll
+sys.modules["rollmod"] = roll
 spec.loader.exec_module(roll)
 pc = roll.pcmod
 family = roll.pcres["family"]
