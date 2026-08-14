@@ -17,14 +17,17 @@ The script name retains the `_ja_` suffix because it reproduces the Japanese-lab
 | File | Purpose |
 | --- | --- |
 | `pcmv_domv_solver_20260713.py` | Directly constrained solvers for PCMV and DOMV |
-| `dtcmv_mvs_solver_20260713.py` | Backward moment recursion for dTCMV–MVS |
+| `dtcmv_mvs_solver_20260814.py` | **Current baseline-consistent dTCMV–MVS runner.** Uses the same dTCMV variance-aversion scale as the main MV equal-mean comparison, so the `eta0=0` case nests the MV baseline. |
+| `dtcmv_mvs_solver_20260713.py` | Historical dTCMV–MVS numerical core retained for reproducibility of earlier outputs. Its old entry point used `gamma0=2.5` and should not be used for the current paper baseline. |
+
+The corrected MVS baseline is `gamma0 = 1.193359375`, matching the dTCMV row of `results/equal_mean_calibration.csv`. The previous MVS-only baseline `gamma0=2.5` changed both the variance-aversion coefficient and the skewness coefficient at the same time and therefore did not provide a clean MV-to-MVS nesting comparison.
 
 ## 02_calibration: calibration
 
 | File | Purpose |
 | --- | --- |
 | `equal_mean_calibration_20260713.py` | Organises calibration values for equal-mean comparisons |
-| `run_mvs_refined_calibration.py` | Performs refined calibration of the MVS coefficients |
+| `run_mvs_refined_calibration.py` | Performs refined calibration of the MVS coefficients from the corrected dTCMV baseline |
 
 ## 03_rolling: rolling conditional evaluation
 
@@ -71,6 +74,16 @@ Principal outputs include:
 | `rebuild_all_corrected_glide_outputs.py` | Reconstructs the corrected glide-path and distribution outputs in one run |
 | `localize_paper_figures_ja_20260717.py` | Regenerates the Japanese-labelled paper figures |
 
+## Validation
+
+For the dTCMV–MVS nesting check, run:
+
+```bash
+python validation/validate_dtcmv_mvs_nesting.py
+```
+
+This compares the `eta0=0` MVS glide path under `gamma0=1.193359375` with the saved main-paper dTCMV MV glide path. Because the MV and MVS implementations use different control-grid/refinement rules, the check is a numerical consistency diagnostic rather than a bit-for-bit identity test.
+
 ## 90_workers: auxiliary workers
 
 `mvs_worker.py` and `sensitivity_worker.py` support split or parallel execution. They are not normally run directly.
@@ -82,8 +95,9 @@ python scripts/01_solvers/pcmv_domv_solver_20260713.py
 python scripts/03_rolling/recompute_d0_rolling.py
 python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir d0_sensitivity_outputs
 python scripts/04_sensitivity/numerical_diagnostics_20260718.py
-python scripts/01_solvers/dtcmv_mvs_solver_20260713.py
+python scripts/01_solvers/dtcmv_mvs_solver_20260814.py
 python scripts/02_calibration/run_mvs_refined_calibration.py
+python validation/validate_dtcmv_mvs_nesting.py
 ```
 
 After reorganisation, all scripts continue to read from and write to the repository-level `results/` and `figs/` directories.
