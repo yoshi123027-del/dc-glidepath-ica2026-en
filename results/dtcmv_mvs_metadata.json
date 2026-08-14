@@ -40,11 +40,11 @@
   "baseline_dtcmv_gamma0": 1.193359375,
   "baseline_dtcmv_gamma0_source": "results/equal_mean_calibration.csv",
   "eta0_zero_nesting_diagnostics": {
-    "mv_nesting_mean_abs_glide_gap": 0.008289798188119972,
+    "mv_nesting_mean_abs_glide_gap": 0.008289798188119953,
     "mv_nesting_max_abs_glide_gap": 0.038346345189267106,
-    "mv_nesting_final_glide_gap": -0.001753327973930352,
+    "mv_nesting_final_glide_gap": -0.00175332797393013,
     "mv_saved_final_glide": 0.9974263752050099,
-    "mvs_eta0_final_glide": 0.9956730472310795
+    "mvs_eta0_final_glide": 0.9956730472310797
   },
   "historical_solver_retained": "scripts/01_solvers/dtcmv_mvs_solver_20260713.py"
 }
