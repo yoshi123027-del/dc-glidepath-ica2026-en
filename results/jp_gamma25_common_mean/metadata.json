@@ -1,0 +1,27 @@
+{
+  "paper_wide_target_mean": 70.34483966999646,
+  "target_definition": "dTCMV-MVS base-grid mean at gamma0=2.5, eta0=0",
+  "mvs_base_grid": {
+    "n_steps": 480,
+    "n_x": 151,
+    "n_controls": 25,
+    "n_gh": 5
+  },
+  "mv_grid": {
+    "n_steps": 480,
+    "n_x": 151,
+    "n_controls": 15,
+    "n_gh": 5,
+    "parabolic_control_refinement": true
+  },
+  "mv_calibration": {
+    "gamma_p": 0.14258942569203456,
+    "pcmv_target_z": 77.35798244090435,
+    "gamma_d": 0.206240234375,
+    "gamma_c": 0.12570312500000003,
+    "rho_d": 2.5,
+    "theta_cp": 0.27294921875
+  },
+  "dtcmv_numerical_mean_gap_vs_mvs": 0.07769147751434957,
+  "note": "rho_d=gamma0=2.5 is held fixed to preserve theoretical nesting; the small mean gap is numerical because the MV solver uses 15 controls plus parabolic refinement whereas the MVS solver uses 25 controls without refinement."
+}
