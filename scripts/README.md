@@ -84,7 +84,7 @@ For the corrected baseline, `eta0 = 0` must recover the main-paper dTCMV MV glid
 python validation/validate_dtcmv_mvs_nesting.py
 ```
 
-The regression check currently requires mean absolute glide-path error below 0.02, maximum absolute error below 0.05, and the final-decision error below 0.01.
+The regression check requires mean absolute glide-path error below 0.02, maximum absolute error below 0.05, and the final-decision error below 0.01.
 
 ## Main recomputation sequence
 
