@@ -37,6 +37,14 @@ jobs:
       - name: Validate eta0=0 nesting
         run: python validation/validate_dtcmv_mvs_nesting.py
 
+      - name: Sync public supplementary figures
+        run: |
+          cp figs/fig_dtcmv_mvs_fixed_gamma_glidepaths.png supplementary/figures/fig_dtcmv_mvs_fixed_gamma_glidepaths.png
+          cp figs/fig_dtcmv_mvs_equal_mean_glidepaths.png supplementary/figures/fig_dtcmv_mvs_equal_mean_glidepaths.png
+          cp figs/fig_dtcmv_mvs_equal_mean_cdf.png supplementary/figures/fig_dtcmv_mvs_equal_mean_cdf.png
+          cp figs/fig_dtcmv_mvs_tail_frontier.png supplementary/figures/fig_dtcmv_mvs_tail_frontier.png
+          cp figs/fig_dtcmv_mvs_rolling_metrics.png supplementary/figures/fig_dtcmv_mvs_rolling_metrics.png
+
       - name: Show corrected summaries
         run: |
           echo '--- fixed gamma ---'
@@ -62,7 +70,12 @@ jobs:
                   figs/fig_dtcmv_mvs_equal_mean_glidepaths.png \
                   figs/fig_dtcmv_mvs_equal_mean_cdf.png \
                   figs/fig_dtcmv_mvs_tail_frontier.png \
-                  figs/fig_dtcmv_mvs_rolling_metrics.png
+                  figs/fig_dtcmv_mvs_rolling_metrics.png \
+                  supplementary/figures/fig_dtcmv_mvs_fixed_gamma_glidepaths.png \
+                  supplementary/figures/fig_dtcmv_mvs_equal_mean_glidepaths.png \
+                  supplementary/figures/fig_dtcmv_mvs_equal_mean_cdf.png \
+                  supplementary/figures/fig_dtcmv_mvs_tail_frontier.png \
+                  supplementary/figures/fig_dtcmv_mvs_rolling_metrics.png
           if git diff --cached --quiet; then
             echo 'No regenerated output changes to commit.'
           else
