@@ -1,0 +1,29 @@
+name: JP gamma2.5 common-mean experiment
+
+on:
+  push:
+    branches:
+      - agent/jp-gamma25-common-mean
+
+permissions:
+  contents: write
+
+jobs:
+  recompute:
+    if: ${{ !contains(github.event.head_commit.message, '[skip jp gamma25]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe gamma2.5 nesting and target mean
+        run: python experiments/jp_gamma25_common_mean/probe_gamma25.py
+      - name: Commit probe result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/jp_gamma25_common_mean/gamma25_probe.json
+          git commit -m 'Store gamma2.5 probe result [skip jp gamma25]'
+          git push origin HEAD:agent/jp-gamma25-common-mean
