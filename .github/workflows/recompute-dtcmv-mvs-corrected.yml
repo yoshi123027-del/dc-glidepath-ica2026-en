@@ -1,0 +1,71 @@
+name: Recompute corrected dTCMV-MVS
+
+on:
+  push:
+    branches:
+      - agent/fix-dtcmv-mvs-nesting
+
+permissions:
+  contents: write
+
+jobs:
+  full-recompute:
+    if: ${{ !contains(github.event.head_commit.message, '[skip mvs rerun]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Full corrected monthly MVS recomputation
+        run: python scripts/01_solvers/dtcmv_mvs_solver_20260814.py
+
+      - name: Refined equal-mean calibration
+        run: python scripts/02_calibration/run_mvs_refined_calibration.py
+
+      - name: Validate eta0=0 nesting
+        run: python validation/validate_dtcmv_mvs_nesting.py
+
+      - name: Show corrected summaries
+        run: |
+          echo '--- fixed gamma ---'
+          cat results/dtcmv_mvs_fixed_gamma_summary.csv
+          echo '--- equal mean ---'
+          cat results/dtcmv_mvs_equal_mean_summary.csv
+          echo '--- refined equal mean ---'
+          cat results/dtcmv_mvs_equal_mean_refined.csv
+          echo '--- metadata ---'
+          cat results/dtcmv_mvs_metadata.json
+
+      - name: Commit regenerated numerical outputs
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/dtcmv_mvs_fixed_gamma_summary.csv \
+                  results/dtcmv_mvs_equal_mean_summary.csv \
+                  results/dtcmv_mvs_equal_mean_refined.csv \
+                  results/dtcmv_mvs_rolling_summary.csv \
+                  results/dtcmv_mvs_metadata.json \
+                  results/dtcmv_mvs_arrays.npz \
+                  figs/fig_dtcmv_mvs_fixed_gamma_glidepaths.png \
+                  figs/fig_dtcmv_mvs_equal_mean_glidepaths.png \
+                  figs/fig_dtcmv_mvs_equal_mean_cdf.png \
+                  figs/fig_dtcmv_mvs_tail_frontier.png \
+                  figs/fig_dtcmv_mvs_rolling_metrics.png
+          if git diff --cached --quiet; then
+            echo 'No regenerated output changes to commit.'
+          else
+            git commit -m 'Recompute corrected dTCMV-MVS outputs [skip mvs rerun]'
+            git push origin HEAD:agent/fix-dtcmv-mvs-nesting
+          fi
