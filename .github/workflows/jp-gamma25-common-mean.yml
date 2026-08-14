@@ -18,12 +18,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Probe gamma2.5 nesting and target mean
-        run: python experiments/jp_gamma25_common_mean/probe_gamma25.py
-      - name: Commit probe result
+      - name: Recompute Japanese gamma2.5 common-mean analysis
+        run: python experiments/jp_gamma25_common_mean/recompute_main_analysis.py
+      - name: Commit experiment outputs
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add results/jp_gamma25_common_mean/gamma25_probe.json
-          git commit -m 'Store gamma2.5 probe result [skip jp gamma25]'
+          git add results/jp_gamma25_common_mean figs/jp_gamma25_common_mean
+          git commit -m 'Store Japanese gamma2.5 common-mean outputs [skip jp gamma25]'
           git push origin HEAD:agent/jp-gamma25-common-mean
