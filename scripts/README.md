@@ -17,17 +17,15 @@ The script name retains the `_ja_` suffix because it reproduces the Japanese-lab
 | File | Purpose |
 | --- | --- |
 | `pcmv_domv_solver_20260713.py` | Directly constrained solvers for PCMV and DOMV |
-| `dtcmv_mvs_solver_20260814.py` | **Current baseline-consistent dTCMV–MVS runner.** Uses the same dTCMV variance-aversion scale as the main MV equal-mean comparison, so the `eta0=0` case nests the MV baseline. |
-| `dtcmv_mvs_solver_20260713.py` | Historical dTCMV–MVS numerical core retained for reproducibility of earlier outputs. Its old entry point used `gamma0=2.5` and should not be used for the current paper baseline. |
-
-The corrected MVS baseline is `gamma0 = 1.193359375`, matching the dTCMV row of `results/equal_mean_calibration.csv`. The previous MVS-only baseline `gamma0=2.5` changed both the variance-aversion coefficient and the skewness coefficient at the same time and therefore did not provide a clean MV-to-MVS nesting comparison.
+| `dtcmv_mvs_solver_20260713.py` | Historical dTCMV–MVS numerical core retained to reproduce the original 20260713 outputs |
+| `dtcmv_mvs_solver_20260814.py` | Current baseline-consistent dTCMV–MVS runner; uses the main-paper dTCMV value `gamma0 = 1.193359375`, so `eta0 = 0` nests the MV baseline up to numerical discretisation error |
 
 ## 02_calibration: calibration
 
 | File | Purpose |
 | --- | --- |
 | `equal_mean_calibration_20260713.py` | Organises calibration values for equal-mean comparisons |
-| `run_mvs_refined_calibration.py` | Performs refined calibration of the MVS coefficients from the corrected dTCMV baseline |
+| `run_mvs_refined_calibration.py` | Performs refined MVS calibration using the corrected 20260814 baseline |
 
 ## 03_rolling: rolling conditional evaluation
 
@@ -74,19 +72,19 @@ Principal outputs include:
 | `rebuild_all_corrected_glide_outputs.py` | Reconstructs the corrected glide-path and distribution outputs in one run |
 | `localize_paper_figures_ja_20260717.py` | Regenerates the Japanese-labelled paper figures |
 
-## Validation
+## 90_workers: auxiliary workers
 
-For the dTCMV–MVS nesting check, run:
+`mvs_worker.py` and `sensitivity_worker.py` support split or parallel execution. They are not normally run directly.
+
+## dTCMV–MVS nesting validation
+
+For the corrected baseline, `eta0 = 0` must recover the main-paper dTCMV MV glide path up to the small numerical difference caused by different control-grid/refinement rules. Run:
 
 ```bash
 python validation/validate_dtcmv_mvs_nesting.py
 ```
 
-This compares the `eta0=0` MVS glide path under `gamma0=1.193359375` with the saved main-paper dTCMV MV glide path. Because the MV and MVS implementations use different control-grid/refinement rules, the check is a numerical consistency diagnostic rather than a bit-for-bit identity test.
-
-## 90_workers: auxiliary workers
-
-`mvs_worker.py` and `sensitivity_worker.py` support split or parallel execution. They are not normally run directly.
+The regression check currently requires mean absolute glide-path error below 0.02, maximum absolute error below 0.05, and the final-decision error below 0.01.
 
 ## Main recomputation sequence
 
@@ -100,4 +98,4 @@ python scripts/02_calibration/run_mvs_refined_calibration.py
 python validation/validate_dtcmv_mvs_nesting.py
 ```
 
-After reorganisation, all scripts continue to read from and write to the repository-level `results/` and `figs/` directories.
+The corrected MVS runner regenerates the dTCMV–MVS CSV/NPZ results and figures in the repository-level `results/` and `figs/` directories. The public copies in `supplementary/figures/` should be kept synchronized with the regenerated `figs/` outputs.
