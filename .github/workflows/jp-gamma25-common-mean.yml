@@ -32,5 +32,9 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add results/jp_gamma25_common_mean figs/jp_gamma25_common_mean
           git commit -m 'Store strict common-mean Japanese gamma2.5 outputs [skip jp gamma25]'
+          # Importing the legacy solvers may refresh tracked cache/output files
+          # outside the experiment directories. They are not part of this
+          # Japanese-only experiment, so discard them before rebasing.
+          git reset --hard HEAD
           git pull --rebase origin agent/jp-gamma25-common-mean
           git push origin HEAD:agent/jp-gamma25-common-mean
