@@ -18,8 +18,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Recompute Japanese gamma2.5 common-mean analysis
+      - name: Build MVS gamma2.5 anchor and preliminary outputs
         run: python experiments/jp_gamma25_common_mean/recompute_main_analysis.py
+      - name: Refine all MV coefficients to the MVS eta0=0 target mean
+        run: python experiments/jp_gamma25_common_mean/refine_equal_mean_coefficients.py
+      - name: Rebuild MV outputs at strict common mean
+        run: python experiments/jp_gamma25_common_mean/apply_refined_equal_mean_outputs.py
       - name: Recompute N80 sensitivity screens
         run: python experiments/jp_gamma25_common_mean/recompute_sensitivity.py
       - name: Commit experiment outputs
@@ -27,5 +31,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add results/jp_gamma25_common_mean figs/jp_gamma25_common_mean
-          git commit -m 'Store complete Japanese gamma2.5 outputs [skip jp gamma25]'
+          git commit -m 'Store strict common-mean Japanese gamma2.5 outputs [skip jp gamma25]'
+          git pull --rebase origin agent/jp-gamma25-common-mean
           git push origin HEAD:agent/jp-gamma25-common-mean
