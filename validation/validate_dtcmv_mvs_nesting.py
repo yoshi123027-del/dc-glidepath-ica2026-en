@@ -5,8 +5,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parents[1]
 SOLVER_DIR = ROOT / "scripts" / "01_solvers"
 sys.path.insert(0, str(SOLVER_DIR))
@@ -28,14 +26,25 @@ def main() -> None:
     for key, value in diag.items():
         print(f"{key}: {value:.9f}")
 
-    # This guards against a recurrence of the former gamma0=2.5 mismatch,
-    # which created an order-one terminal glide-path discrepancy.  It is not a
-    # bitwise solver-equality test because the MV and MVS implementations use
-    # different control-grid/refinement rules.
-    if abs(diag["mv_nesting_final_glide_gap"]) > 0.15:
+    # eta0=0 has the same economic objective as dTCMV-MV.  The two numerical
+    # implementations are not bitwise identical because the MVS solver uses a
+    # global control-grid search without the MV solver's parabolic refinement.
+    # These tolerances are therefore numerical, but tight enough to prevent a
+    # recurrence of the historical gamma0=2.5 mismatch.
+    if diag["mv_nesting_mean_abs_glide_gap"] > 0.02:
         raise AssertionError(
-            "eta0=0 MVS no longer nests the main dTCMV MV baseline: "
-            f"final glide gap={diag['mv_nesting_final_glide_gap']:.6f}"
+            "eta0=0 MVS mean glide gap is too large: "
+            f"{diag['mv_nesting_mean_abs_glide_gap']:.6f}"
+        )
+    if diag["mv_nesting_max_abs_glide_gap"] > 0.05:
+        raise AssertionError(
+            "eta0=0 MVS maximum glide gap is too large: "
+            f"{diag['mv_nesting_max_abs_glide_gap']:.6f}"
+        )
+    if abs(diag["mv_nesting_final_glide_gap"]) > 0.01:
+        raise AssertionError(
+            "eta0=0 MVS terminal glide gap is too large: "
+            f"{diag['mv_nesting_final_glide_gap']:.6f}"
         )
 
 
