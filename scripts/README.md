@@ -17,14 +17,15 @@ The script name retains the `_ja_` suffix because it reproduces the Japanese-lab
 | File | Purpose |
 | --- | --- |
 | `pcmv_domv_solver_20260713.py` | Directly constrained solvers for PCMV and DOMV |
-| `dtcmv_mvs_solver_20260713.py` | Backward moment recursion for dTCMV–MVS |
+| `dtcmv_mvs_solver_20260713.py` | Historical dTCMV–MVS numerical core retained to reproduce the original 20260713 outputs |
+| `dtcmv_mvs_solver_20260814.py` | Current baseline-consistent dTCMV–MVS runner; uses the main-paper dTCMV value `gamma0 = 1.193359375`, so `eta0 = 0` nests the MV baseline up to numerical discretisation error |
 
 ## 02_calibration: calibration
 
 | File | Purpose |
 | --- | --- |
 | `equal_mean_calibration_20260713.py` | Organises calibration values for equal-mean comparisons |
-| `run_mvs_refined_calibration.py` | Performs refined calibration of the MVS coefficients |
+| `run_mvs_refined_calibration.py` | Performs refined MVS calibration using the corrected 20260814 baseline |
 
 ## 03_rolling: rolling conditional evaluation
 
@@ -75,6 +76,16 @@ Principal outputs include:
 
 `mvs_worker.py` and `sensitivity_worker.py` support split or parallel execution. They are not normally run directly.
 
+## dTCMV–MVS nesting validation
+
+For the corrected baseline, `eta0 = 0` must recover the main-paper dTCMV MV glide path up to the small numerical difference caused by different control-grid/refinement rules. Run:
+
+```bash
+python validation/validate_dtcmv_mvs_nesting.py
+```
+
+The regression check requires mean absolute glide-path error below 0.02, maximum absolute error below 0.05, and the final-decision error below 0.01.
+
 ## Main recomputation sequence
 
 ```bash
@@ -82,8 +93,9 @@ python scripts/01_solvers/pcmv_domv_solver_20260713.py
 python scripts/03_rolling/recompute_d0_rolling.py
 python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir d0_sensitivity_outputs
 python scripts/04_sensitivity/numerical_diagnostics_20260718.py
-python scripts/01_solvers/dtcmv_mvs_solver_20260713.py
+python scripts/01_solvers/dtcmv_mvs_solver_20260814.py
 python scripts/02_calibration/run_mvs_refined_calibration.py
+python validation/validate_dtcmv_mvs_nesting.py
 ```
 
-After reorganisation, all scripts continue to read from and write to the repository-level `results/` and `figs/` directories.
+The corrected MVS runner regenerates the dTCMV–MVS CSV/NPZ results and figures in the repository-level `results/` and `figs/` directories. The public copies in `supplementary/figures/` should be kept synchronized with the regenerated `figs/` outputs.
