@@ -1,0 +1,62 @@
+name: Recompute projection gap original fine grid
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+permissions:
+  contents: write
+jobs:
+  run:
+    if: ${{ contains(github.event.head_commit.message, '[run projection-gap]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - name: Compute original fine-grid projection diagnostics
+        run: |
+          git show a3b83a590474a4d88642d7ce95cfddda9b60461a:scripts/03_rolling/recompute_d0_rolling.py > scripts/03_rolling/recompute_projection_temp.py
+          python - <<'PY'
+          import importlib.util,sys,math
+          from pathlib import Path
+          import numpy as np,pandas as pd
+          from numpy.polynomial.hermite import hermgauss
+          from scipy.integrate import solve_ivp
+          p=Path('scripts/03_rolling/recompute_projection_temp.py'); spec=importlib.util.spec_from_file_location('rrproj',p); rr=importlib.util.module_from_spec(spec); sys.modules['rrproj']=rr; spec.loader.exec_module(rr)
+          T=40.; N=480; dt=T/N; x0=1/12; r=.015; mu=.055; beta=mu-r; sigma=.18; c=1.; D=0.; gc=.12565490722656253; rho=2.5083699226379395
+          nx=1001; na=81; ngh=15; xg=300*np.linspace(0,1,nx)**1.6
+          h,w=hermgauss(ngh); ghx=np.sqrt(2)*h.astype(float); ghw=(w/np.sqrt(np.pi)).astype(float)
+          H=np.zeros(N+1)
+          for n in range(N-1,-1,-1): H[n]=(c*dt+H[n+1])/(1+r*dt)
+          print('solve cTCMV fine',flush=True)
+          _,_,Pc=rr.solve_tc(0,N,xg,H,dt,r,beta,sigma,c,D,gc,rho,na,ghx,ghw)
+          pmfc,_,_=rr.forward_policy(N,xg,x0,0,Pc,dt,r,beta,sigma,c,ghx,ghw)
+          print('solve dTCMV fine',flush=True)
+          _,_,Pd=rr.solve_tc(1,N,xg,H,dt,r,beta,sigma,c,D,gc,rho,na,ghx,ghw)
+          pmfd,_,_=rr.forward_policy(N,xg,x0,0,Pd,dt,r,beta,sigma,c,ghx,ghw)
+          times=np.arange(N)*dt; tau=T-times; A=beta**2/sigma**2
+          def frac(d):
+              cl=np.minimum(np.maximum(d,0),xg[None,:]); out=np.zeros_like(cl); pos=xg>0; out[:,pos]=cl[:,pos]/xg[None,pos]; return np.clip(out,0,1)
+          Pcc=frac(np.broadcast_to((beta/(sigma**2*gc)*np.exp(-r*tau))[:,None],(N,nx)).copy())
+          def rhs(_t,s):
+              i1,i2=s; th=A/(rho*beta)*(math.exp(-i1)+rho*math.exp(-i2)-rho); return [-(r+beta*th-sigma**2*th**2),-(sigma**2*th**2)]
+          sol=solve_ivp(rhs,(T,0),[0,0],rtol=1e-10,atol=1e-12,dense_output=True,method='DOP853'); i1,i2=sol.sol(times); th=A/(rho*beta)*(np.exp(-i1)+rho*np.exp(-i2)-rho)
+          Pdc=frac(th[:,None]*(xg[None,:]+H[:-1,None]))
+          def wq(vals,weights,q):
+              v=np.asarray(vals).ravel(); wt=np.asarray(weights).ravel(); mask=(wt>0)&np.isfinite(v)&np.isfinite(wt); v=v[mask]; wt=wt[mask]; o=np.argsort(v); v=v[o]; wt=wt[o]; cs=np.cumsum(wt); return float(v[min(np.searchsorted(cs,q*cs[-1]),len(v)-1)])
+          rows=[]
+          for name,Ps,Pcl,pmf in [('cTCMV',Pc,Pcc,pmfc),('dTCMV',Pd,Pdc,pmfd)]:
+              delta=np.abs(Ps-Pcl); weights=pmf[:-1].copy(); weights[:,0]=0; weights/=N; dpi=delta*xg[None,:]; reachable=weights>0
+              rows.append({'strategy':name,'PG_WMAE':float(np.sum(weights*delta)),'abs_dg_q95':wq(delta,weights,.95),'abs_dg_q99':wq(delta,weights,.99),'max_abs_dg_reachable':float(np.max(delta[reachable])),'weighted_mean_abs_dpi':float(np.sum(weights*dpi)),'max_abs_dpi_reachable':float(np.max(dpi[reachable]))})
+          out=Path('results/jp_gamma25_common_mean/original_method_projection_gap_fine.csv'); out.parent.mkdir(parents=True,exist_ok=True); pd.DataFrame(rows).to_csv(out,index=False); print(pd.DataFrame(rows).to_string(index=False))
+          PY
+          rm scripts/03_rolling/recompute_projection_temp.py
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/jp_gamma25_common_mean/original_method_projection_gap_fine.csv
+          git commit -m 'Store original-grid projection-gap diagnostic [skip projection-gap] [skip parameter-only-v2] [skip parameter-only] [skip pcmv calibration] [skip original fig6] [skip export jp]'
+          git push origin HEAD:agent/jp-gamma25-common-mean

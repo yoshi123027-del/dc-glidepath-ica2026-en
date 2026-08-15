@@ -1,0 +1,15 @@
+name: Inspect original analysis files
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List candidate scripts
+        run: |
+          echo '=== scripts ==='
+          find scripts -maxdepth 3 -type f | sort
+          echo '=== grep figure names ==='
+          grep -R -n -E 'fig_all_strategies_terminal_cdf_D0_N480|fig_all_strategies_glidepaths_D0_N480|policy_heatmap_cTCMV_N480_reachable|fig_strict_vs_clipped_glidepaths_by_strategy_N480_no_cp60|fig_common_state_rolling_selected_D0_N480' scripts supplementary validation . || true

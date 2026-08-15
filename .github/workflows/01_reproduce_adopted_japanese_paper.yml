@@ -1,0 +1,333 @@
+name: 01 Reproduce adopted Japanese-paper analysis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - reorg/final-paper-20260815
+
+permissions:
+  contents: read
+
+jobs:
+  recompute:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run adopted]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python requirements
+        run: pip install -r requirements.txt
+
+      - name: Install Japanese font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Restore original-method algorithms and change parameters only
+        run: |
+          mkdir -p scripts/01_solvers scripts/03_rolling scripts/04_sensitivity scripts/05_figures figs results
+          OLD=a3b83a590474a4d88642d7ce95cfddda9b60461a
+          for f in \
+            scripts/01_solvers/pcmv_domv_solver_20260713.py \
+            scripts/01_solvers/dtcmv_mvs_solver_20260713.py \
+            scripts/03_rolling/recompute_d0_rolling.py \
+            scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py \
+            scripts/03_rolling/make_common_state_rolling_figure_20260713.py \
+            scripts/04_sensitivity/low_balance_refined_sensitivity_20260714.py \
+            scripts/04_sensitivity/add_all_clip_overlays_20260721.py \
+            scripts/04_sensitivity/numerical_diagnostics_20260718.py \
+            scripts/05_figures/localize_paper_figures_ja_20260717.py; do
+            git show ${OLD}:$f > $f
+          done
+
+          python - <<'PY'
+          from pathlib import Path
+
+          GP='0.14286739349365235'
+          GD='0.20613769531249998'
+          GC='0.12565490722656253'
+          RHO='2.5083699226379395'
+          CP='0.273138427734375'
+          TARGET='70.34483966999646'
+
+          p=Path('scripts/03_rolling/recompute_d0_rolling.py')
+          s=p.read_text()
+          s=s.replace("D=0.0,\n    n_x=151,",f"D=0.0,\n    gamma_p={GP},\n    gamma_d={GD},\n    n_x=151,")
+          s=s.replace('gamma_c = 0.059638671875',f'gamma_c = {GC}')
+          s=s.replace('gamma0 = 1.193359375',f'gamma0 = {RHO}')
+          s=s.replace('theta_cp = 0.4694735',f'theta_cp = {CP}')
+          p.write_text(s)
+
+          p=Path('scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py')
+          p.write_text(p.read_text().replace('gamma0 = 1.193359375',f'gamma0 = {RHO}'))
+
+          p=Path('scripts/04_sensitivity/low_balance_refined_sensitivity_20260714.py')
+          s=p.read_text()
+          s=s.replace('gamma_p: float = 0.05',f'gamma_p: float = {GP}')
+          s=s.replace('gamma_d: float = 0.0912608',f'gamma_d: float = {GD}')
+          s=s.replace('gamma_c: float = 0.059638671875',f'gamma_c: float = {GC}')
+          s=s.replace('gamma_0: float = 1.193359375',f'gamma_0: float = {RHO}')
+          s=s.replace('theta_cp: float = 0.4694735',f'theta_cp: float = {CP}')
+          p.write_text(s)
+
+          p=Path('scripts/04_sensitivity/numerical_diagnostics_20260718.py')
+          s=p.read_text().replace('GAMMA0 = 1.193359375',f'GAMMA0 = {RHO}')
+          s=s.replace('target_mean: float = 84.77708640828797',f'target_mean: float = {TARGET}')
+          s=s.replace('upper_gamma = 1.8','upper_gamma = 4.0')
+          p.write_text(s)
+
+          # Preserve fixed-gamma terminal PMFs for the adopted Figure 6 density panel.
+          p=Path('scripts/01_solvers/dtcmv_mvs_solver_20260713.py')
+          s=p.read_text()
+          s=s.replace(
+              'glide_fixed=np.stack([r["glide"] for r in fixed_results]),',
+              'glide_fixed=np.stack([r["glide"] for r in fixed_results]),\n        pmf_fixed=np.stack([r["pmf"] for r in fixed_results]),'
+          )
+          p.write_text(s)
+          PY
+
+      - name: Monthly baseline and rolling analysis
+        run: |
+          python scripts/03_rolling/recompute_d0_rolling.py
+          python scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py
+          python scripts/03_rolling/make_common_state_rolling_figure_20260713.py
+
+      - name: Original Figure 2, Figure 3 and Figure 5 rendering
+        run: |
+          python - <<'PY'
+          import importlib.util, sys
+          from pathlib import Path
+          p=Path('scripts/05_figures/localize_paper_figures_ja_20260717.py')
+          spec=importlib.util.spec_from_file_location('locfig',p)
+          m=importlib.util.module_from_spec(spec)
+          sys.modules['locfig']=m
+          spec.loader.exec_module(m)
+          m.make_baseline_figures()
+          m.make_heatmap('ctcmv_policy','ctcmv_pmf','cTCMV','policy_heatmap_cTCMV_N480_reachable.png')
+          m.make_heatmap('dtcmv_policy','dtcmv_pmf','dTCMV','policy_heatmap_dTCMV_N480_reachable.png')
+          m.make_common_state_figure()
+          PY
+
+      - name: Figure 1 — CDF, terminal density and q05-q95
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import numpy as np, pandas as pd
+          import matplotlib as mpl, matplotlib.pyplot as plt
+          from matplotlib.gridspec import GridSpec
+          from matplotlib.font_manager import FontProperties
+          from matplotlib.lines import Line2D
+
+          fp=Path('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
+          if fp.exists():
+              mpl.font_manager.fontManager.addfont(str(fp))
+              mpl.rcParams['font.family']=FontProperties(fname=str(fp)).get_name()
+          mpl.rcParams['axes.unicode_minus']=False
+
+          z=np.load('results/monthly_D0_policy_arrays.npz')
+          summary=pd.read_csv('results/monthly_baseline_D0_summary.csv')
+          strategies=[
+              ('PCMV','pcmv','#1f77b4',z['xg_pc']),
+              ('DOMV','domv','#ff7f0e',z['xg_pc']),
+              ('cTCMV','ctcmv','#2ca02c',z['xg_tc']),
+              ('dTCMV','dtcmv','#d62728',z['xg_tc']),
+              ('CP','cp','#9467bd',z['xg_tc']),
+          ]
+
+          fig=plt.figure(figsize=(11.2,10.0))
+          gs=GridSpec(2,2,height_ratios=[1.1,1],hspace=.30,wspace=.25)
+          ax1=fig.add_subplot(gs[0,:]); ax2=fig.add_subplot(gs[1,0]); ax3=fig.add_subplot(gs[1,1])
+
+          for label,key,color,xg in strategies:
+              pmf=z[f'{key}_pmf'][-1]
+              ax1.plot(xg,np.cumsum(pmf),label=label,color=color,lw=2.2)
+              ax2.plot(xg,pmf/np.gradient(xg),label=label,color=color,lw=2.0)
+          ax1.set(xlim=(0,220),ylim=(0,1.02),xlabel='終端DC富',ylabel='累積確率')
+          ax1.grid(alpha=.22); ax1.legend(loc='lower right',ncol=3,frameon=True)
+          ax1.text(0,1.02,'(a) 終端分布のCDF',transform=ax1.transAxes,fontsize=12,fontweight='bold',va='bottom')
+          ax2.set(xlim=(0,220),ylim=(0,.05),xlabel='終端DC富',ylabel='確率密度（格子近似）')
+          ax2.grid(alpha=.22); ax2.legend(loc='upper right',frameon=True,fontsize=9)
+          ax2.text(0,1.02,'(b) 終端分布の密度',transform=ax2.transAxes,fontsize=12,fontweight='bold',va='bottom')
+
+          summary['plot_strategy']=summary['strategy'].replace({'CP 60%':'CP'})
+          order=['PCMV','DOMV','cTCMV','dTCMV','CP']
+          sub=summary.set_index('plot_strategy').loc[order].reset_index()
+          yy=np.arange(len(sub))[::-1]
+          for y,row in zip(yy,sub.itertuples(index=False)):
+              color=next(c for lab,_,c,_ in strategies if lab==row.plot_strategy)
+              ax3.hlines(y,row.q05,row.q95,color=color,lw=4,alpha=.85)
+              ax3.plot(row.mean,y,'o',ms=7,color=color,mec='black',mew=.5)
+              ax3.plot(row.q50,y,marker='D',ms=6,color='white',mec=color,mew=1.8)
+          ax3.set_yticks(yy); ax3.set_yticklabels(sub['plot_strategy'])
+          ax3.set(xlim=(30,120),xlabel='終端DC富',ylabel='戦略')
+          ax3.grid(alpha=.22,axis='x')
+          ax3.text(0,1.02,'(c) q05–q95区間と中心位置',transform=ax3.transAxes,fontsize=12,fontweight='bold',va='bottom')
+          ax3.legend(handles=[
+              Line2D([0],[0],color='gray',lw=4,label='q05–q95'),
+              Line2D([0],[0],marker='o',color='gray',lw=0,markersize=7,label='平均'),
+              Line2D([0],[0],marker='D',color='#333',lw=0,markersize=6,markerfacecolor='white',label='中央値')
+          ],loc='lower right',frameon=True,fontsize=9)
+          fig.savefig('figs/fig01_adopted_cdf_density_qrange.png',dpi=180,bbox_inches='tight')
+          plt.close(fig)
+          PY
+
+      - name: Figure 4 — strict vs clip, complete 0-100 percent display
+        run: |
+          python - <<'PY'
+          import math
+          from pathlib import Path
+          import numpy as np, pandas as pd
+          import matplotlib as mpl, matplotlib.pyplot as plt
+          from matplotlib.font_manager import FontProperties
+          from numpy.polynomial.hermite import hermgauss
+          from scipy.integrate import solve_ivp
+
+          fp=Path('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
+          if fp.exists():
+              mpl.font_manager.fontManager.addfont(str(fp))
+              mpl.rcParams['font.family']=FontProperties(fname=str(fp)).get_name()
+          mpl.rcParams['axes.unicode_minus']=False
+
+          R=.015; MU=.055; BETA=MU-R; SIG=.18; C=1.; T=40.; X0=1/12
+          GP=.14286739349365235; GD=.20613769531249998; GC=.12565490722656253; RHO=2.5083699226379395
+          z=np.load('results/monthly_D0_policy_arrays.npz'); t=z['decision_times']; dt=float(t[1]-t[0]); N=len(t)
+          xpc=z['xg_pc']; xtc=z['xg_tc']
+          strict={'PCMV':(xpc,z['pcmv_policy']),'DOMV':(xpc,z['domv_policy']),'cTCMV':(xtc,z['ctcmv_policy']),'dTCMV':(xtc,z['dtcmv_policy'])}
+          gh0,gw0=hermgauss(5); gh=np.sqrt(2)*gh0; gw=gw0/np.sqrt(np.pi)
+          H=np.zeros(N+1)
+          for n in range(N-1,-1,-1): H[n]=(C*dt+H[n+1])/(1+R*dt)
+          A=BETA**2/SIG**2; tau=T-t
+          def frac(grid,d):
+              d=np.minimum(np.maximum(d,0),grid[None,:]); out=np.zeros_like(d); pos=grid>0
+              out[:,pos]=d[:,pos]/grid[None,pos]; return np.clip(out,0,1)
+          y0=X0+H[0]; zp=y0*math.exp(R*T)+math.exp(A*T)/GP
+          Pp=frac(xpc,BETA/SIG**2*(zp*np.exp(-R*tau)[:,None]-(xpc[None,:]+H[:-1,None])))
+          Pd=frac(xpc,np.broadcast_to((BETA/(SIG**2*GD)*np.exp((A-R)*tau))[:,None],(N,len(xpc))).copy())
+          Pc=frac(xtc,np.broadcast_to((BETA/(SIG**2*GC)*np.exp(-R*tau))[:,None],(N,len(xtc))).copy())
+          def rhs(_tt,s):
+              i1,i2=s; th=A/(RHO*BETA)*(math.exp(-i1)+RHO*math.exp(-i2)-RHO)
+              return [-(R+BETA*th-SIG**2*th**2),-(SIG**2*th**2)]
+          sol=solve_ivp(rhs,(T,0),[0,0],rtol=1e-10,atol=1e-12,dense_output=True,method='DOP853')
+          i1,i2=sol.sol(t); th=A/(RHO*BETA)*(np.exp(-i1)+RHO*np.exp(-i2)-RHO)
+          Pr=frac(xtc,th[:,None]*(xtc[None,:]+H[:-1,None]))
+          clip={'PCMV':Pp,'DOMV':Pd,'cTCMV':Pc,'dTCMV':Pr}
+          def dep(g,p,x,w):
+              if x<=g[0]: p[0]+=w; return
+              if x>=g[-1]: p[-1]+=w; return
+              j=int(np.searchsorted(g,x)-1); l=(x-g[j])/(g[j+1]-g[j]); p[j]+=w*(1-l); p[j+1]+=w*l
+          def fwd(g,P):
+              p=np.zeros(len(g)); dep(g,p,X0,1); glide=np.zeros(N)
+              for n in range(N):
+                  glide[n]=float(np.clip(np.interp(X0,g,P[0]*g)/X0,0,1)) if n==0 else float(p@P[n])
+                  pn=np.zeros(len(g)); states=[(X0,1.,glide[0])] if n==0 else [(float(x),float(p[i]),float(P[n,i])) for i,x in enumerate(g) if p[i]>0]
+                  for x,mass,a in states:
+                      pi=a*x; drift=(R*x+C+BETA*pi)*dt; sd=SIG*pi*math.sqrt(dt)
+                      for zz,ww in zip(gh,gw): dep(g,pn,max(x+drift+sd*zz,0),mass*float(ww))
+                  pn/=pn.sum(); p=pn
+              return glide
+          curves={name:(fwd(g,Ps),fwd(g,clip[name])) for name,(g,Ps) in strict.items()}
+          pd.DataFrame({'time':t,**{f'{n}_strict':v[0] for n,v in curves.items()},**{f'{n}_clip':v[1] for n,v in curves.items()}}).to_csv('results/parameter_only_strict_vs_clip_paths.csv',index=False)
+          fig,axes=plt.subplots(2,2,figsize=(12.2,8.7),sharex=True)
+          for ax,name in zip(axes.ravel(),['PCMV','DOMV','cTCMV','dTCMV']):
+              gs,gc=curves[name]
+              ax.plot(t,gs,color='#1f77b4',lw=1.8,label='厳密制約解')
+              ax.plot(t,gc,color='#ff7f0e',lw=1.8,label='無制約クリップ近似')
+              ax.axhline(.6,color='#2ca02c',ls='--',lw=1,alpha=.20)
+              ax.set_title(name); ax.set_xlabel('加入後経過年数'); ax.set_ylabel('確率質量加重リスク資産比率')
+              ax.set_xlim(0,40); ax.set_ylim(0,1.04); ax.grid(alpha=.25)
+          h,l=axes[0,0].get_legend_handles_labels(); fig.legend(h,l,loc='upper center',bbox_to_anchor=(.5,.99),ncol=2,frameon=False)
+          fig.tight_layout(rect=(0,0,1,.95)); fig.savefig('figs/fig04_adopted_strict_vs_clip.png',dpi=180); plt.close(fig)
+          PY
+
+      - name: MVS analysis and Figure 6 — glide, density and q05-q95
+        run: |
+          python scripts/01_solvers/dtcmv_mvs_solver_20260713.py
+          python - <<'PY'
+          from pathlib import Path
+          import numpy as np, pandas as pd
+          import matplotlib as mpl, matplotlib.pyplot as plt
+          from matplotlib.gridspec import GridSpec
+          from matplotlib.font_manager import FontProperties
+          from matplotlib.lines import Line2D
+
+          fp=Path('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
+          if fp.exists():
+              mpl.font_manager.fontManager.addfont(str(fp))
+              mpl.rcParams['font.family']=FontProperties(fname=str(fp)).get_name()
+          mpl.rcParams['axes.unicode_minus']=False
+
+          z=np.load('results/dtcmv_mvs_arrays.npz')
+          summary=pd.read_csv('results/dtcmv_mvs_fixed_gamma_summary.csv')
+          t=z['decision_times']; xg=z['x_grid']; etas=z['fixed_eta_grid']; gl=z['glide_fixed']; pmfs=z['pmf_fixed']
+          colors=['#1f77b4','#ff7f0e','#2ca02c','#d62728']
+          fig=plt.figure(figsize=(11.2,10.0)); gs=GridSpec(2,2,height_ratios=[1.1,1],hspace=.30,wspace=.25)
+          ax1=fig.add_subplot(gs[0,:]); ax2=fig.add_subplot(gs[1,0]); ax3=fig.add_subplot(gs[1,1])
+          for eta,g,p,color in zip(etas,gl,pmfs,colors):
+              lab=fr'$\eta_0={eta:g}$'
+              ax1.plot(t,g,label=lab,color=color,lw=1.9)
+              ax2.plot(xg,p[-1]/np.gradient(xg),label=lab,color=color,lw=2.0)
+          ax1.set(xlim=(0,40),ylim=(0,1.02),xlabel='加入後経過年数',ylabel='確率質量加重リスク資産比率')
+          ax1.grid(alpha=.22); ax1.legend(ncol=2,frameon=True)
+          ax1.text(0,1.02,'(a) MVSグライドパス',transform=ax1.transAxes,fontsize=12,fontweight='bold',va='bottom')
+          ax2.set(xlim=(0,220),ylim=(0,None),xlabel='終端DC富',ylabel='確率密度（格子近似）')
+          ax2.grid(alpha=.22); ax2.legend(frameon=True,fontsize=9)
+          ax2.text(0,1.02,'(b) 終端分布の密度',transform=ax2.transAxes,fontsize=12,fontweight='bold',va='bottom')
+          yy=np.arange(len(summary))[::-1]
+          for y,row,color in zip(yy,summary.itertuples(index=False),colors):
+              ax3.hlines(y,row.q05,row.q95,color=color,lw=4,alpha=.85)
+              ax3.plot(row.mean,y,'o',ms=7,color=color,mec='black',mew=.5)
+              ax3.plot(row.q50,y,marker='D',ms=6,color='white',mec=color,mew=1.8)
+          ax3.set_yticks(yy); ax3.set_yticklabels([fr'$\eta_0={e:g}$' for e in etas])
+          ax3.set(xlim=(25,200),xlabel='終端DC富',ylabel='歪度係数')
+          ax3.grid(alpha=.22,axis='x')
+          ax3.text(0,1.02,'(c) q05–q95区間と中心位置',transform=ax3.transAxes,fontsize=12,fontweight='bold',va='bottom')
+          ax3.legend(handles=[Line2D([0],[0],color='gray',lw=4,label='q05–q95'),Line2D([0],[0],marker='o',color='gray',lw=0,label='平均'),Line2D([0],[0],marker='D',color='#333',lw=0,markerfacecolor='white',label='中央値')],loc='lower right',fontsize=9)
+          fig.savefig('figs/fig06_adopted_mvs_glide_density_qrange.png',dpi=180,bbox_inches='tight'); plt.close(fig)
+          PY
+
+      - name: Supplementary sensitivity and diagnostics
+        run: |
+          rm -rf parameter_only_sensitivity
+          python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir parameter_only_sensitivity
+          python scripts/04_sensitivity/numerical_diagnostics_20260718.py
+
+      - name: Package adopted outputs
+        run: |
+          mkdir -p artifact/01_figures artifact/02_results artifact/03_sensitivity
+          cp figs/fig01_adopted_cdf_density_qrange.png artifact/01_figures/01_fig01_cdf_density_qrange.png
+          cp figs/fig_all_strategies_glidepaths_D0_N480.png artifact/01_figures/02_fig02_glidepaths.png
+          cp figs/policy_heatmap_cTCMV_N480_reachable.png artifact/01_figures/03_fig03a_heatmap_cTCMV.png
+          cp figs/policy_heatmap_dTCMV_N480_reachable.png artifact/01_figures/04_fig03b_heatmap_dTCMV.png
+          cp figs/fig04_adopted_strict_vs_clip.png artifact/01_figures/05_fig04_strict_vs_clip.png
+          cp figs/fig_common_state_rolling_selected_D0_N480.png artifact/01_figures/06_fig05_common_state_rolling.png
+          cp figs/fig06_adopted_mvs_glide_density_qrange.png artifact/01_figures/07_fig06_mvs_glide_density_qrange.png
+          cp results/*.csv artifact/02_results/ || true
+          cp results/*.json artifact/02_results/ || true
+          cp parameter_only_sensitivity/figs/* artifact/03_sensitivity/ || true
+          cat > artifact/FINAL_PARAMETERS.txt <<'EOF'
+          reference_commit=a3b83a590474a4d88642d7ce95cfddda9b60461a
+          gamma_p=0.14286739349365235
+          pcmv_target_z=77.32192859847035
+          gamma_d=0.20613769531249998
+          gamma_c=0.12565490722656253
+          rho_d=2.5083699226379395
+          theta_cp=0.273138427734375
+          common_target_mean=70.34483966999646
+          MVS_Figure6_gamma0=2.5
+          MVS_Figure6_eta0=0,0.5,1,2
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adopted-japanese-paper-analysis
+          path: artifact
+          retention-days: 30
