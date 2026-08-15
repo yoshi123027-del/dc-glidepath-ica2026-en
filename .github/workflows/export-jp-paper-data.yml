@@ -14,16 +14,17 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Export compact arrays and recalibrated common-state rolling results
+      - name: Export compact arrays, common-state rolling, and dTCMV x-max sensitivity
         run: |
           python - <<'PY'
-          import importlib.util, math, sys
+          import importlib.util, json, math, sys
           import numpy as np, pandas as pd
           from pathlib import Path
 
           ROOT=Path('.')
           out=Path('results/jp_gamma25_common_mean/paper_export'); out.mkdir(parents=True, exist_ok=True)
           z=np.load('results/jp_gamma25_common_mean/mv_policy_arrays.npz', allow_pickle=True)
+          coef=json.loads(Path('results/jp_gamma25_common_mean/refined_equal_mean_coefficients.json').read_text())
           lines=[]
           for k in z.files:
               a=np.asarray(z[k]); lines.append(f'{k}\tshape={a.shape}\tdtype={a.dtype}')
@@ -36,29 +37,51 @@ jobs:
           roll=importlib.util.module_from_spec(spec); sys.modules['rollmod']=roll; spec.loader.exec_module(roll)
           xg=np.asarray(z['xg_tc'],float); Pc=np.asarray(z['ctcmv_policy'],float); Pd=np.asarray(z['dtcmv_policy'],float); pmfd=np.asarray(z['dtcmv_pmf'],float)
 
-          def qstate(pmfrow,q):
-              p=np.asarray(pmfrow,float); p=p/p.sum(); j=int(np.searchsorted(np.cumsum(p),q,side='left')); return float(xg[min(j,len(xg)-1)])
-          def cvar_lower(grid,p,alpha=.05):
+          def qstate(grid,pmfrow,q):
+              p=np.asarray(pmfrow,float); p=p/p.sum(); j=int(np.searchsorted(np.cumsum(p),q,side='left')); return float(grid[min(j,len(grid)-1)])
+          def lower_cvar(grid,p,alpha=.05):
               p=np.asarray(p,float); p=p/p.sum(); rem=alpha; total=0.0
               for v,w in zip(grid,p):
                   take=min(rem,w); total+=take*v; rem-=take
                   if rem<=1e-15: break
               return total/alpha
-          def st_from_pmf(pmf):
-              p=np.asarray(pmf[-1],float); p=p/p.sum(); mean=float(p@xg); var=float(p@((xg-mean)**2)); sd=math.sqrt(max(var,0.0)); third=float(p@((xg-mean)**3)); skew=third/sd**3 if sd>0 else 0.0
+          def upper_cvar(grid,p,alpha=.05):
+              p=np.asarray(p,float); p=p/p.sum(); rem=alpha; total=0.0
+              for v,w in zip(grid[::-1],p[::-1]):
+                  take=min(rem,w); total+=take*v; rem-=take
+                  if rem<=1e-15: break
+              return total/alpha
+          def st_from_terminal(grid,p):
+              p=np.asarray(p,float); p=p/p.sum(); mean=float(p@grid); var=float(p@((grid-mean)**2)); sd=math.sqrt(max(var,0.0)); third=float(p@((grid-mean)**3)); skew=third/sd**3 if sd>0 else 0.0
               c=np.cumsum(p)
-              def q(a): return float(xg[min(int(np.searchsorted(c,a,'left')),len(xg)-1)])
-              return dict(mean=mean,stdev=sd,median=q(.5),q05=q(.05),cvar05=cvar_lower(xg,p,.05),q95=q(.95),skewness=skew)
+              def q(a): return float(grid[min(int(np.searchsorted(c,a,'left')),len(grid)-1)])
+              return dict(mean=mean,stdev=sd,median=q(.5),q05=q(.05),cvar05=lower_cvar(grid,p,.05),q95=q(.95),ucvar95=upper_cvar(grid,p,.05),skewness=skew)
+
           rows=[]
-          selected=[]
           for year,quant,label in [(30,.5,'30年・中央値'),(30,.9,'30年・高残高'),(35,.1,'35年・低残高')]:
-              n=min(int(round(year/roll.dt)),roll.N-1); x=qstate(pmfd[n],quant); selected.append((year,label,n,x))
+              n=min(int(round(year/roll.dt)),roll.N-1); x=qstate(xg,pmfd[n],quant)
               for name,P in [('cTCMV',Pc),('dTCMV',Pd)]:
                   pmf,glide,upper=roll.forward_policy(roll.N,xg,x,n,P,roll.dt,roll.r,roll.beta,roll.sigma,roll.c,roll.gh_x,roll.gh_w)
-                  st=st_from_pmf(pmf); risky=roll.interp_at(xg,P[n],x)
+                  st=st_from_terminal(xg,pmf[-1]); risky=roll.interp_at(xg,P[n],x)
                   rows.append(dict(state=label,year=year,start_x=x,strategy=name,risky_fraction=risky,**st))
           pd.DataFrame(rows).to_csv(out/'common_state_rolling.csv',index=False)
+
+          # Nested-tail x_max check at the recalibrated dTCMV rho_d.
+          xrows=[]
+          base=xg.copy()
+          for xmax in [300,600,900]:
+              if xmax==300:
+                  gx=base
+              else:
+                  tail=np.arange(302.0,float(xmax)+1e-9,2.0)
+                  gx=np.concatenate([base,tail])
+              M,Q,P=roll.solve_tc(1,roll.N,gx,roll.H,roll.dt,roll.r,roll.beta,roll.sigma,roll.c,roll.D,float(coef['gamma_c']),float(coef['rho_d']),roll.n_controls,roll.gh_x,roll.gh_w)
+              pmf,glide,upper=roll.forward_policy(roll.N,gx,roll.x0,0,P,roll.dt,roll.r,roll.beta,roll.sigma,roll.c,roll.gh_x,roll.gh_w)
+              st=st_from_terminal(gx,pmf[-1])
+              xrows.append(dict(x_max=xmax,rho_d=float(coef['rho_d']),mean=st['mean'],stdev=st['stdev'],ucvar95=st['ucvar95'],avg_glide=float(np.mean(glide)),terminal_upper_mass=float(pmf[-1,-1])))
+          pd.DataFrame(xrows).to_csv(out/'dtcmv_xmax_sensitivity.csv',index=False)
           print(pd.DataFrame(rows).to_string(index=False))
+          print(pd.DataFrame(xrows).to_string(index=False))
           PY
       - name: Commit exports
         run: |
