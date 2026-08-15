@@ -1,0 +1,1 @@
+Triggered fine-grid projection-gap recomputation with original grid and new parameters.
