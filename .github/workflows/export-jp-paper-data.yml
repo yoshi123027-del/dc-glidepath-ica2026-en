@@ -1,0 +1,41 @@
+name: Export JP paper data
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+permissions:
+  contents: write
+jobs:
+  export:
+    if: ${{ !contains(github.event.head_commit.message, '[skip export jp]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install numpy pandas
+      - name: Export NPZ inventory and compact arrays
+        run: |
+          python - <<'PY'
+          import numpy as np, pandas as pd
+          from pathlib import Path
+          p=Path('results/jp_gamma25_common_mean/mv_policy_arrays.npz')
+          z=np.load(p, allow_pickle=True)
+          out=Path('results/jp_gamma25_common_mean/paper_export'); out.mkdir(parents=True, exist_ok=True)
+          lines=[]
+          for k in z.files:
+              a=np.asarray(z[k]); lines.append(f'{k}\tshape={a.shape}\tdtype={a.dtype}')
+              if a.ndim==1 and a.size<=2000 and np.issubdtype(a.dtype, np.number):
+                  pd.DataFrame({k:a}).to_csv(out/f'{k}.csv', index=False)
+          (out/'npz_inventory.txt').write_text('\n'.join(lines),encoding='utf-8')
+          print('\n'.join(lines))
+          PY
+      - name: Commit exports
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/jp_gamma25_common_mean/paper_export
+          git commit -m 'Export compact Japanese paper arrays [skip export jp]' || exit 0
+          git reset --hard HEAD
+          git pull --rebase origin agent/jp-gamma25-common-mean
+          git push origin HEAD:agent/jp-gamma25-common-mean
