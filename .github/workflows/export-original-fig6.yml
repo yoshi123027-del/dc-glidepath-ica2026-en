@@ -1,0 +1,68 @@
+name: Export original Figure 6 monthly MVS data
+
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    if: ${{ !contains(github.event.head_commit.message, '[skip original fig6]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Recompute original Figure 6 method
+        run: |
+          python - <<'PY'
+          import importlib.util, sys
+          from dataclasses import asdict
+          from pathlib import Path
+          import numpy as np, pandas as pd
+
+          root=Path('.')
+          path=root/'scripts'/'01_solvers'/'dtcmv_mvs_solver_20260713.py'
+          spec=importlib.util.spec_from_file_location('origmvs',path)
+          mod=importlib.util.module_from_spec(spec); sys.modules['origmvs']=mod; spec.loader.exec_module(mod)
+
+          base=mod.Config(gamma0=2.5,eta0=0.0)
+          baseline=mod.solve_case(base)
+          maps=baseline['maps']
+          etas=[0.0,0.5,1.0,2.0]
+          results=[]
+          for eta in etas:
+              cfg=mod.Config(**{**asdict(base),'gamma0':2.5,'eta0':eta})
+              results.append(mod.solve_case(cfg,maps=maps))
+
+          times=np.arange(base.n_steps)*base.dt
+          out=pd.DataFrame({'time':times})
+          for eta,res in zip(etas,results):
+              out[f'eta_{eta:g}']=res['glide']
+          outdir=root/'results'/'jp_gamma25_common_mean'
+          outdir.mkdir(parents=True,exist_ok=True)
+          out.to_csv(outdir/'original_fig6_monthly.csv',index=False)
+
+          s=[]
+          for eta,res in zip(etas,results):
+              s.append({'eta0':eta,'gamma0':2.5,**res['stats'],**res['diagnostics'],'final_glide':float(res['glide'][-1])})
+          pd.DataFrame(s).to_csv(outdir/'original_fig6_summary.csv',index=False)
+          print(pd.DataFrame(s).to_string(index=False))
+          PY
+          cp results/jp_gamma25_common_mean/original_fig6_monthly.csv /tmp/original_fig6_monthly.csv
+          cp results/jp_gamma25_common_mean/original_fig6_summary.csv /tmp/original_fig6_summary.csv
+      - name: Commit exports
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git reset --hard HEAD
+          mkdir -p results/jp_gamma25_common_mean
+          cp /tmp/original_fig6_monthly.csv results/jp_gamma25_common_mean/original_fig6_monthly.csv
+          cp /tmp/original_fig6_summary.csv results/jp_gamma25_common_mean/original_fig6_summary.csv
+          git add results/jp_gamma25_common_mean/original_fig6_monthly.csv results/jp_gamma25_common_mean/original_fig6_summary.csv
+          git commit -m 'Store original Figure 6 monthly data [skip original fig6]'
+          git push origin HEAD:agent/jp-gamma25-common-mean
