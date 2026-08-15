@@ -1,0 +1,17 @@
+decision_times	shape=(480,)	dtype=float64
+xg_pc	shape=(151,)	dtype=float64
+xg_tc	shape=(151,)	dtype=float64
+pcmv_policy	shape=(480, 151)	dtype=float64
+domv_policy	shape=(480, 151)	dtype=float64
+ctcmv_policy	shape=(480, 151)	dtype=float64
+dtcmv_policy	shape=(480, 151)	dtype=float64
+pcmv_pmf	shape=(481, 151)	dtype=float64
+domv_pmf	shape=(481, 151)	dtype=float64
+ctcmv_pmf	shape=(481, 151)	dtype=float64
+dtcmv_pmf	shape=(481, 151)	dtype=float64
+cp_pmf	shape=(481, 151)	dtype=float64
+pcmv_glide	shape=(480,)	dtype=float64
+domv_glide	shape=(480,)	dtype=float64
+ctcmv_glide	shape=(480,)	dtype=float64
+dtcmv_glide	shape=(480,)	dtype=float64
+cp_glide	shape=(480,)	dtype=float64
