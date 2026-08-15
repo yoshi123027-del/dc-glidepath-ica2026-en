@@ -1,0 +1,31 @@
+{
+  "as_of": "2026-08-15",
+  "analysis_rule": "original numerical method; calibration parameters changed only",
+  "reference_commit": "a3b83a590474a4d88642d7ce95cfddda9b60461a",
+  "common_target_mean": 70.34483966999646,
+  "PCMV": {
+    "gamma_p": 0.14286739349365235,
+    "target_m_p_base": 77.32192859847035
+  },
+  "DOMV": {
+    "gamma_d": 0.20613769531249998
+  },
+  "cTCMV": {
+    "gamma_c": 0.12565490722656253
+  },
+  "dTCMV": {
+    "rho_d": 2.5083699226379395
+  },
+  "CP": {
+    "theta_cp": 0.273138427734375
+  },
+  "MVS_figure6": {
+    "gamma0": 2.5,
+    "eta0": [0.0, 0.5, 1.0, 2.0],
+    "n_steps": 480,
+    "n_x": 151,
+    "n_controls": 25,
+    "n_gh": 5,
+    "x_max": 300.0
+  }
+}

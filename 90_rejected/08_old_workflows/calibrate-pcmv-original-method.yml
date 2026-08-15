@@ -1,0 +1,57 @@
+name: Calibrate PCMV under original method
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+permissions:
+  contents: write
+jobs:
+  calibrate:
+    if: ${{ !contains(github.event.head_commit.message, '[skip pcmv calibration]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - run: |
+          git show a3b83a590474a4d88642d7ce95cfddda9b60461a:scripts/01_solvers/pcmv_domv_solver_20260713.py > scripts/01_solvers/pcmv_domv_solver_20260713.py
+          python - <<'PY'
+          import importlib.util,sys
+          from dataclasses import replace
+          from pathlib import Path
+          import numpy as np,pandas as pd
+          p=Path('scripts/01_solvers/pcmv_domv_solver_20260713.py')
+          spec=importlib.util.spec_from_file_location('pcold',p); m=importlib.util.module_from_spec(spec); sys.modules['pcold']=m; spec.loader.exec_module(m)
+          target=70.34483966999646
+          base=replace(m.Config(n_steps=480),D=0.0,n_x=151,n_controls=15,n_gh=5,target_step=5.0,x_max=300.0)
+          targets=np.arange(base.target_min,base.target_max+0.1*base.target_step,base.target_step)
+          fam=m.solve_target_family(base,targets)
+          cache={}
+          def ev(g):
+              g=float(g); cfg=replace(base,gamma_p=g)
+              cal=m.find_pcmv_target(cfg,fam)
+              ex=m.solve_exact_target(cfg,float(cal['z_root']))
+              P=ex['policy'][0].astype(float)
+              f=m.forward_distribution(cfg,fam['x_grid'],P,fam['gh_x'],fam['gh_w'])
+              st=m.terminal_stats(fam['x_grid'],f['pmf'][-1],0.0)
+              row=dict(gamma_p=g,target_z=float(cal['z_root']),mean=st['mean'],stdev=st['stdev'],skewness=st['skewness'],q05=st['q05'],q50=st['q50'],q95=st['q95'],cvar05=st['cvar05'],avg_glide=float(np.mean(f['glide'])),upper_bind=float(np.mean(f['upper_bind'])),final_glide=float(f['glide'][-1]))
+              cache[g]=row; return row
+          lo,hi=.12,.17
+          rlo,rhi=ev(lo),ev(hi)
+          for _ in range(18):
+              mid=(lo+hi)/2; r=ev(mid)
+              if r['mean']>target: lo=mid
+              else: hi=mid
+          best=min(cache.values(),key=lambda r:abs(r['mean']-target))
+          out=Path('results/jp_gamma25_common_mean/original_method_pcmv_calibration.csv'); out.parent.mkdir(parents=True,exist_ok=True)
+          pd.DataFrame(sorted(cache.values(),key=lambda r:r['gamma_p'])).to_csv(out,index=False)
+          Path('results/jp_gamma25_common_mean/original_method_pcmv_best.txt').write_text('\n'.join(f'{k}={v}' for k,v in best.items()))
+          print('BEST',best)
+          PY
+          git checkout -- scripts/01_solvers/pcmv_domv_solver_20260713.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/jp_gamma25_common_mean/original_method_pcmv_calibration.csv results/jp_gamma25_common_mean/original_method_pcmv_best.txt
+          git commit -m 'Store original-method PCMV calibration [skip pcmv calibration]'
+          git push origin HEAD:agent/jp-gamma25-common-mean

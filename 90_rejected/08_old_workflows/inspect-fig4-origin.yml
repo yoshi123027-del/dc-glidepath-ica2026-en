@@ -1,0 +1,15 @@
+name: Inspect Figure 4 origin
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git fetch --depth=1 origin a3b83a590474a4d88642d7ce95cfddda9b60461a
+          echo '=== grep working tree ==='
+          grep -R -n -E '109\.157|104\.772|0\.0210|0\.0363|0\.2014|0\.1447|strict_vs_clipped|projection_gap' . --exclude-dir=.git || true
+          echo '=== all historical paths containing clip/projection ==='
+          git ls-tree -r --name-only a3b83a590474a4d88642d7ce95cfddda9b60461a | grep -Ei 'clip|projection|strict|feedback' || true

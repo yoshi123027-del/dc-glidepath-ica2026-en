@@ -1,0 +1,11 @@
+name: Inspect projection gap code
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          grep -R -n -E '1001|81, *15|PG_WMAE|projection.gap|projection_gap|weighted.*gap|clip.*diagnostic' scripts validation . --exclude-dir=.git || true
