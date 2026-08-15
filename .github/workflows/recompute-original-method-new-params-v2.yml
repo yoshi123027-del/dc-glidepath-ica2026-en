@@ -1,0 +1,231 @@
+name: Recompute original paper methods parameter-only v2
+
+on:
+  push:
+    branches: [agent/jp-gamma25-common-mean]
+
+permissions:
+  contents: write
+
+jobs:
+  recompute:
+    if: ${{ !contains(github.event.head_commit.message, '[skip parameter-only-v2]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Install original Japanese plotting font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Restore original analysis scripts and change calibration parameters only
+        run: |
+          OLD=a3b83a590474a4d88642d7ce95cfddda9b60461a
+          for f in \
+            scripts/01_solvers/pcmv_domv_solver_20260713.py \
+            scripts/01_solvers/dtcmv_mvs_solver_20260713.py \
+            scripts/03_rolling/recompute_d0_rolling.py \
+            scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py \
+            scripts/03_rolling/make_common_state_rolling_figure_20260713.py \
+            scripts/04_sensitivity/low_balance_refined_sensitivity_20260714.py \
+            scripts/04_sensitivity/add_all_clip_overlays_20260721.py \
+            scripts/04_sensitivity/numerical_diagnostics_20260718.py \
+            scripts/05_figures/localize_paper_figures_ja_20260717.py; do
+            git show ${OLD}:$f > $f
+          done
+          python - <<'PY'
+          from pathlib import Path
+          GP='0.14286739349365235'
+          GD='0.20613769531249998'
+          GC='0.12565490722656253'
+          RHO='2.5083699226379395'
+          CP='0.273138427734375'
+          TARGET='70.34483966999646'
+
+          p=Path('scripts/03_rolling/recompute_d0_rolling.py')
+          s=p.read_text()
+          s=s.replace("D=0.0,\n    n_x=151,", f"D=0.0,\n    gamma_p={GP},\n    gamma_d={GD},\n    n_x=151,")
+          s=s.replace('gamma_c = 0.059638671875', f'gamma_c = {GC}')
+          s=s.replace('gamma0 = 1.193359375', f'gamma0 = {RHO}')
+          s=s.replace('theta_cp = 0.4694735', f'theta_cp = {CP}')
+          p.write_text(s)
+
+          p=Path('scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py')
+          p.write_text(p.read_text().replace('gamma0 = 1.193359375', f'gamma0 = {RHO}'))
+
+          p=Path('scripts/04_sensitivity/low_balance_refined_sensitivity_20260714.py')
+          s=p.read_text()
+          s=s.replace('gamma_p: float = 0.05', f'gamma_p: float = {GP}')
+          s=s.replace('gamma_d: float = 0.0912608', f'gamma_d: float = {GD}')
+          s=s.replace('gamma_c: float = 0.059638671875', f'gamma_c: float = {GC}')
+          s=s.replace('gamma_0: float = 1.193359375', f'gamma_0: float = {RHO}')
+          s=s.replace('theta_cp: float = 0.4694735', f'theta_cp: float = {CP}')
+          p.write_text(s)
+
+          p=Path('scripts/04_sensitivity/numerical_diagnostics_20260718.py')
+          s=p.read_text().replace('GAMMA0 = 1.193359375', f'GAMMA0 = {RHO}')
+          s=s.replace('target_mean: float = 84.77708640828797', f'target_mean: float = {TARGET}')
+          p.write_text(s)
+          PY
+
+      - name: Recompute original monthly baseline and rolling analyses
+        run: |
+          python scripts/03_rolling/recompute_d0_rolling.py
+          python scripts/03_rolling/detailed_dtcmv_rolling_overlay_20260713.py
+          python scripts/03_rolling/make_common_state_rolling_figure_20260713.py
+
+      - name: Regenerate original Japanese Figure 1 2 3 and 5 layouts
+        run: |
+          python - <<'PY'
+          import importlib.util,sys
+          from pathlib import Path
+          p=Path('scripts/05_figures/localize_paper_figures_ja_20260717.py')
+          spec=importlib.util.spec_from_file_location('locfig',p)
+          m=importlib.util.module_from_spec(spec); sys.modules['locfig']=m; spec.loader.exec_module(m)
+          m.make_baseline_figures()
+          m.make_heatmap('ctcmv_policy','ctcmv_pmf','cTCMV','policy_heatmap_cTCMV_N480_reachable.png')
+          m.make_heatmap('dtcmv_policy','dtcmv_pmf','dTCMV','policy_heatmap_dTCMV_N480_reachable.png')
+          m.make_common_state_figure()
+          PY
+
+      - name: Recompute original Figure 4 strict versus clip using new parameters only
+        run: |
+          python - <<'PY'
+          import math
+          from pathlib import Path
+          import numpy as np,pandas as pd,matplotlib as mpl,matplotlib.pyplot as plt
+          from matplotlib.font_manager import FontProperties
+          from numpy.polynomial.hermite import hermgauss
+          from scipy.integrate import solve_ivp
+
+          font_candidates=[Path('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'),Path('/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf')]
+          for fp in font_candidates:
+              if fp.exists():
+                  mpl.font_manager.fontManager.addfont(str(fp)); mpl.rcParams['font.family']=FontProperties(fname=str(fp)).get_name(); break
+          mpl.rcParams['axes.unicode_minus']=False
+
+          R=.015; MU=.055; BETA=MU-R; SIG=.18; C=1.; T=40.; X0=1/12
+          GP=.14286739349365235; GD=.20613769531249998; GC=.12565490722656253; RHO=2.5083699226379395
+          z=np.load('results/monthly_D0_policy_arrays.npz'); t=z['decision_times']; dt=float(t[1]-t[0]); N=len(t)
+          xpc=z['xg_pc']; xtc=z['xg_tc']
+          strict={'PCMV':(xpc,z['pcmv_policy']),'DOMV':(xpc,z['domv_policy']),'cTCMV':(xtc,z['ctcmv_policy']),'dTCMV':(xtc,z['dtcmv_policy'])}
+          gh0,gw0=hermgauss(5); gh=np.sqrt(2)*gh0; gw=gw0/np.sqrt(np.pi)
+          H=np.zeros(N+1)
+          for n in range(N-1,-1,-1): H[n]=(C*dt+H[n+1])/(1+R*dt)
+          A=BETA**2/SIG**2; tau=T-t
+          def frac(grid,d):
+              d=np.minimum(np.maximum(d,0),grid[None,:]); out=np.zeros_like(d); pos=grid>0; out[:,pos]=d[:,pos]/grid[None,pos]; return np.clip(out,0,1)
+          y0=X0+H[0]; zp=y0*math.exp(R*T)+math.exp(A*T)/GP
+          Pp=frac(xpc,BETA/SIG**2*(zp*np.exp(-R*tau)[:,None]-(xpc[None,:]+H[:-1,None])))
+          Pd=frac(xpc,np.broadcast_to((BETA/(SIG**2*GD)*np.exp((A-R)*tau))[:,None],(N,len(xpc))).copy())
+          Pc=frac(xtc,np.broadcast_to((BETA/(SIG**2*GC)*np.exp(-R*tau))[:,None],(N,len(xtc))).copy())
+          def rhs(_tt,s):
+              i1,i2=s; th=A/(RHO*BETA)*(math.exp(-i1)+RHO*math.exp(-i2)-RHO); return [-(R+BETA*th-SIG**2*th**2),-(SIG**2*th**2)]
+          sol=solve_ivp(rhs,(T,0),[0,0],rtol=1e-10,atol=1e-12,dense_output=True,method='DOP853'); i1,i2=sol.sol(t)
+          th=A/(RHO*BETA)*(np.exp(-i1)+RHO*np.exp(-i2)-RHO); Pr=frac(xtc,th[:,None]*(xtc[None,:]+H[:-1,None]))
+          clip={'PCMV':(xpc,Pp),'DOMV':(xpc,Pd),'cTCMV':(xtc,Pc),'dTCMV':(xtc,Pr)}
+          def dep(g,p,x,w):
+              if x<=g[0]: p[0]+=w; return
+              if x>=g[-1]: p[-1]+=w; return
+              j=int(np.searchsorted(g,x)-1); l=(x-g[j])/(g[j+1]-g[j]); p[j]+=w*(1-l); p[j+1]+=w*l
+          def fwd(g,P):
+              p=np.zeros(len(g)); dep(g,p,X0,1); pmf=np.zeros((N+1,len(g))); pmf[0]=p; glide=np.zeros(N)
+              for n in range(N):
+                  if n==0: glide[n]=float(np.clip(np.interp(X0,g,P[0]*g)/X0,0,1))
+                  else: glide[n]=float(p@P[n])
+                  pn=np.zeros(len(g))
+                  if n==0:
+                      states=[(X0,1.,glide[0])]
+                  else: states=[(float(x),float(p[i]),float(P[n,i])) for i,x in enumerate(g) if p[i]>0]
+                  for x,mass,a in states:
+                      pi=a*x; drift=(R*x+C+BETA*pi)*dt; sd=SIG*pi*math.sqrt(dt)
+                      for zz,ww in zip(gh,gw): dep(g,pn,max(x+drift+sd*zz,0),mass*float(ww))
+                  pn/=pn.sum(); p=pn; pmf[n+1]=p
+              return pmf,glide
+          def stats(g,p):
+              p=p[-1]/p[-1].sum(); mean=float(p@g); sd=math.sqrt(max(float(p@((g-mean)**2)),0)); c=np.cumsum(p)
+              q=lambda a:float(g[min(int(np.searchsorted(c,a)),len(g)-1)])
+              rem=.05; tot=0.
+              for v,w in zip(g,p):
+                  take=min(rem,float(w)); tot+=take*float(v); rem-=take
+                  if rem<=1e-15: break
+              return {'mean':mean,'stdev':sd,'q05':q(.05),'q95':q(.95),'cvar05':tot/.05}
+          curves={}; rows=[]
+          for name in strict:
+              g,Ps=strict[name]; _,Pc0=clip[name]; ps,gs=fwd(g,Ps); pc,gc=fwd(g,Pc0); ss=stats(g,ps); sc=stats(g,pc); curves[name]=(gs,gc)
+              rows.append({'strategy':name,'glide_mae':float(np.mean(np.abs(gc-gs))),'glide_max_abs':float(np.max(np.abs(gc-gs))),'mean_clip_minus_strict':sc['mean']-ss['mean'],'q05_clip_minus_strict':sc['q05']-ss['q05'],'q95_clip_minus_strict':sc['q95']-ss['q95'],'cvar05_clip_minus_strict':sc['cvar05']-ss['cvar05']})
+          pd.DataFrame(rows).to_csv('results/parameter_only_strict_vs_clip_summary.csv',index=False)
+          pd.DataFrame({'time':t,**{f'{n}_strict':curves[n][0] for n in curves},**{f'{n}_clip':curves[n][1] for n in curves}}).to_csv('results/parameter_only_strict_vs_clip_paths.csv',index=False)
+          fig,axes=plt.subplots(2,2,figsize=(12.2,8.7),sharex=True)
+          for ax,name in zip(axes.ravel(),['PCMV','DOMV','cTCMV','dTCMV']):
+              gs,gc=curves[name]; ax.plot(t,gs,color='#1f77b4',lw=1.8,label='厳密制約解'); ax.plot(t,gc,color='#ff7f0e',lw=1.8,label='無制約クリップ近似'); ax.axhline(.6,color='#2ca02c',ls='--',lw=1,alpha=.20)
+              ax.set_title(name); ax.set_xlabel('加入後経過年数'); ax.set_ylabel('確率質量加重リスク資産比率'); ax.set_ylim(.25,1.04); ax.grid(alpha=.25)
+          h,l=axes[0,0].get_legend_handles_labels(); fig.legend(h,l,loc='upper center',bbox_to_anchor=(.5,.99),ncol=2,frameon=False); fig.tight_layout(rect=(0,0,1,.95)); fig.savefig('figs/fig_strict_vs_clipped_glidepaths_by_strategy_N480_no_cp60.png',dpi=180); plt.close(fig)
+          PY
+
+      - name: Recompute original Figure 6 exactly
+        run: |
+          python - <<'PY'
+          import importlib.util,sys
+          from dataclasses import asdict
+          from pathlib import Path
+          import numpy as np,pandas as pd,matplotlib as mpl,matplotlib.pyplot as plt
+          from matplotlib.font_manager import FontProperties
+          p=Path('scripts/01_solvers/dtcmv_mvs_solver_20260713.py'); spec=importlib.util.spec_from_file_location('mvs',p); m=importlib.util.module_from_spec(spec); sys.modules['mvs']=m; spec.loader.exec_module(m)
+          base=m.Config(gamma0=2.5,eta0=0); b=m.solve_case(base); maps=b['maps']; etas=[0.,.5,1.,2.]; rs=[m.solve_case(m.Config(**{**asdict(base),'gamma0':2.5,'eta0':e}),maps=maps) for e in etas]; t=np.arange(base.n_steps)*base.dt
+          fp=Path('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
+          if fp.exists(): mpl.font_manager.fontManager.addfont(str(fp)); mpl.rcParams['font.family']=FontProperties(fname=str(fp)).get_name()
+          mpl.rcParams['axes.unicode_minus']=False
+          fig,ax=plt.subplots(figsize=(9,5.4)); [ax.plot(t,r['glide'],label=fr'$\eta_0={e:.2f}$') for e,r in zip(etas,rs)]; ax.set_xlabel('加入後経過年数'); ax.set_ylabel('確率質量加重リスク資産比率'); ax.set_ylim(0,1.02); ax.grid(alpha=.25); ax.legend(ncol=2); fig.tight_layout(); fig.savefig('figs/fig_dtcmv_mvs_fixed_gamma_glidepaths_ja.png',dpi=180); plt.close(fig)
+          pd.DataFrame([{'eta0':e,'gamma0':2.5,**r['stats'],**r['diagnostics'],'final_glide':float(r['glide'][-1])} for e,r in zip(etas,rs)]).to_csv('results/parameter_only_mvs_fixed_gamma_summary.csv',index=False)
+          pd.DataFrame({'time':t,**{f'eta_{e:g}':r['glide'] for e,r in zip(etas,rs)}}).to_csv('results/parameter_only_mvs_fixed_gamma_monthly.csv',index=False)
+          PY
+
+      - name: Recompute original supplementary N80 sensitivity including clipped overlays
+        run: |
+          rm -rf parameter_only_sensitivity
+          python scripts/04_sensitivity/add_all_clip_overlays_20260721.py --output-dir parameter_only_sensitivity
+
+      - name: Recompute original numerical diagnostics
+        run: |
+          python scripts/04_sensitivity/numerical_diagnostics_20260718.py
+
+      - name: Collect outputs
+        run: |
+          DEST=results/jp_gamma25_common_mean/original_method_parameter_only
+          FDEST=figs/jp_gamma25_common_mean/original_method_parameter_only
+          rm -rf "$DEST" "$FDEST"; mkdir -p "$DEST" "$FDEST/sensitivity"
+          for f in monthly_baseline_D0_summary.csv monthly_D0_policy_arrays.npz rolling_conditional_D0_N480.csv rolling_validation_D0_N480.csv rolling_quantile_detail_D0_N480.csv selected_common_state_rolling_D0_N480.csv parameter_only_strict_vs_clip_summary.csv parameter_only_strict_vs_clip_paths.csv parameter_only_mvs_fixed_gamma_summary.csv parameter_only_mvs_fixed_gamma_monthly.csv moment_consistency_D0_N480.csv mass_truncation_summary_D0_N480.csv mass_truncation_by_time_D0_N480.csv xmax_sensitivity_dtcmv_D0_N480.csv xmax900_equal_mean_calibration_dtcmv_D0_N480.csv xmax900_equal_mean_dtcmv_D0_N480.csv; do test -f results/$f && cp results/$f "$DEST"/; done
+          cp parameter_only_sensitivity/sensitivity_summary.csv "$DEST"/sensitivity_summary_N80.csv
+          cp parameter_only_sensitivity/all_strategies_strict_vs_clip_sensitivity_summary.csv "$DEST"/
+          cp parameter_only_sensitivity/all_strategies_strict_vs_clip_sensitivity_paths.csv "$DEST"/
+          cp parameter_only_sensitivity/all_strategies_strict_vs_clip_sensitivity_glidepaths.npz "$DEST"/
+          cp parameter_only_sensitivity/figs/* "$FDEST/sensitivity"/
+          for f in fig_all_strategies_terminal_cdf_D0_N480.png fig_all_strategies_glidepaths_D0_N480.png policy_heatmap_cTCMV_N480_reachable.png policy_heatmap_dTCMV_N480_reachable.png fig_strict_vs_clipped_glidepaths_by_strategy_N480_no_cp60.png fig_common_state_rolling_selected_D0_N480.png fig_dtcmv_mvs_fixed_gamma_glidepaths_ja.png; do cp figs/$f "$FDEST/$f"; done
+          cat > "$DEST/parameter_changes_only.txt" <<'EOF'
+          Original reference commit: a3b83a590474a4d88642d7ce95cfddda9b60461a
+          gamma_p=0.14286739349365235
+          gamma_d=0.20613769531249998
+          gamma_c=0.12565490722656253
+          rho_d=2.5083699226379395
+          theta_cp=0.273138427734375
+          common target mean=70.34483966999646
+          Figure 6 MVS remains gamma0=2.5 and eta0=0,0.5,1,2.
+          All numerical grids, quadrature orders, interpolation, control-search algorithms, forward propagation, sensitivity scenarios, and figure geometries follow the original scripts.
+          EOF
+
+      - name: Commit outputs
+        run: |
+          git checkout -- scripts/01_solvers scripts/03_rolling scripts/04_sensitivity scripts/05_figures
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/jp_gamma25_common_mean/original_method_parameter_only figs/jp_gamma25_common_mean/original_method_parameter_only
+          git commit -m 'Store parameter-only original-method reanalysis v2 [skip parameter-only-v2] [skip parameter-only] [skip pcmv calibration]'
+          git push origin HEAD:agent/jp-gamma25-common-mean
