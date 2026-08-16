@@ -17,6 +17,14 @@ assert spec.loader is not None
 spec.loader.exec_module(solver)
 
 
+def enriched_stats(result):
+    stats = dict(result["stats"])
+    x = result["x_grid"] + result["cfg"].D
+    p = result["pmf"][-1]
+    stats["q01"] = solver.quantile(x, p, 0.01)
+    return stats
+
+
 def run_configuration(x_max: float, n_x: int, n_controls: int):
     base = solver.Config(x_max=x_max, n_x=n_x, n_controls=n_controls, gamma0=2.5, eta0=0.0)
     baseline = solver.solve_case(base)
@@ -38,7 +46,7 @@ def run_configuration(x_max: float, n_x: int, n_controls: int):
             "n_gh": base.n_gh,
             "eta0": eta,
             "gamma0": 2.5,
-            **result["stats"],
+            **enriched_stats(result),
             **result["diagnostics"],
         })
     return rows, results
@@ -72,7 +80,7 @@ def main() -> None:
         final_rows.append({
             "eta0": eta,
             "gamma0": 2.5,
-            **result["stats"],
+            **enriched_stats(result),
             **result["diagnostics"],
         })
         pmf = result["pmf"][-1]
