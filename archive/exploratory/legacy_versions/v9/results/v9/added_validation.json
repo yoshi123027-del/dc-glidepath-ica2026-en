@@ -1,0 +1,25 @@
+{
+  "cp_checks": [
+    [
+      "(20,20)",
+      "67.75818",
+      "67.75262",
+      "-0.115"
+    ],
+    [
+      "(30,45)",
+      "74.91346",
+      "74.84902",
+      "-1.536"
+    ],
+    [
+      "(35,30)",
+      "40.94567",
+      "40.95548",
+      "0.604"
+    ]
+  ],
+  "quantile_order": "pass",
+  "controls": "pass",
+  "scope": "fixed-policy MC checks, not optimisation verification"
+}

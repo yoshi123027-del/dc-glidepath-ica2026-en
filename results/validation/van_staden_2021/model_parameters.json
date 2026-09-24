@@ -1,0 +1,16 @@
+{
+  "initial_wealth": 100,
+  "horizon": 10,
+  "r": 0.00623,
+  "mu": 0.0816,
+  "sigma": 0.1863,
+  "contribution": 0,
+  "terminal_benefit": 0,
+  "constraints": "unconstrained signed risky dollars; insolvency permitted; positive proportional branch for dTCMV",
+  "targets": [
+    125,
+    250
+  ],
+  "parameter_source": "BENCHMARK_SPECIFICATION.md; eqs.4.2-4.5",
+  "dTCMV_source_discrepancy": "eq.3.5 printed sign differs from moment equilibrium; both retained"
+}

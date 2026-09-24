@@ -1,0 +1,10 @@
+model,validation,checks_passed,checks_total,epsilon_M,epsilon_Q,max_raw_mass_error,overall_check
+PCMV,van Staden et al. (2021) Table 5.1 external reproduction,58,58,,,,True
+DOMV,van Staden et al. (2021) Table 5.1 external reproduction,58,58,,,,True
+cTCMV,van Staden et al. (2021) Table 5.1 external reproduction,58,58,,,,True
+dTCMV,van Staden et al. (2021) Table 5.1 external reproduction,52,52,,,,True
+PCMV,baseline backward-forward and mass diagnostics,7,7,3.367972567502875e-12,3.0468072509393096e-10,9.992007221626409e-16,True
+DOMV,baseline backward-forward and mass diagnostics,7,7,3.311129148642067e-12,3.1650415621697903e-10,1.4432899320127037e-15,True
+cTCMV,baseline backward-forward and mass diagnostics,7,7,3.424815986363683e-12,3.292370820418e-10,1.5543122344752194e-15,True
+dTCMV,baseline backward-forward and mass diagnostics,5,5,3.225864020350855e-12,3.5106495488435025e-10,1.4432899320127037e-15,True
+dTCMV,nested x_max=900 versus x_max=2100 stability,10,10,3.339550858072471e-12,3.346940502524376e-10,2.220446049250313e-15,True

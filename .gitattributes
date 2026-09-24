@@ -1,0 +1,14 @@
+recalibration/** text eol=lf
+recalibration/**/*.npz binary
+results/recalibration_v8/** text eol=lf
+results/recalibration_v8/**/*.npz binary
+paper/** text eol=lf
+paper/*.pdf binary
+
+*.pdf binary
+*.png binary
+*.npz binary
+*.zip binary
+
+# Preserve archived source bytes recorded in inventory.csv
+archive/** -text

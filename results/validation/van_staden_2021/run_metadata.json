@@ -1,0 +1,25 @@
+{
+  "base_commit": "db548f7b3904a1961bba2e6892f0a83ae7e94011",
+  "execution_utc": "2026-09-22T00:38:37.733285+00:00",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "source_url": "https://cs.uwaterloo.ca/~paforsyt/Distributions_2021.pdf",
+  "source_doi": "10.1137/20M1338241",
+  "published_outputs_used_as_inputs": false,
+  "discounted_state": true,
+  "random_seed": null,
+  "engine": "GH quadrature, linear interpolation, numerical backward control optimization, transpose mass deposition; unconstrained symmetry reduction",
+  "source_hashes": {
+    "recalibration/external_vanstaden_2021/engine.py": "7aec849d38f100d1dd20fc670ef0cf9566c330dfa35178a9e3dbf19dd911f6e8",
+    "recalibration/external_vanstaden_2021/regression.py": "d9eb2ad95cb097b4c31181651b7aad2e262b4f8205607439e2461fa24578955b",
+    "recalibration/external_vanstaden_2021/audit.py": "ef85e9ae873280c340cbfb94b727d3c357f9bdcd785d79123f785f955ce36d1a",
+    "recalibration/external_vanstaden_2021/report.py": "b81558cd0d9bb6e9d9c95f1940a89f64c9507736f082af1985a02ac170b160f6",
+    "recalibration/external_vanstaden_2021/run.py": "68ab69acf485f8452596854eb91f7e57310a88a94c5456ee0c319ed7bcd46961",
+    "recalibration/external_vanstaden_2021/reference.py": "445deadde3a28b8ecd2760c21b844ff9b03042389c3074b01f61a43d3c9b0bf8",
+    "recalibration/finite_model.py": "e8da8a1892ca716ad567696486f0ada2606fdab54f609abbc9df932796b2ba31"
+  },
+  "report_execution_utc": "2026-09-22T00:42:48.554735+00:00",
+  "run_count": 72,
+  "numba": "0.67.0"
+}

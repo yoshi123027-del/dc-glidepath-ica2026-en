@@ -1,0 +1,11 @@
+{
+  "authoritative_version": "v14_7",
+  "successor": "v8",
+  "base_commit": "db548f7b3904a1961bba2e6892f0a83ae7e94011",
+  "sha256": {
+    "paper/v14_7/ICA2026_Japanese_revised_v14_7.tex": "7a056cdb28aba754aacf0ec75870e330f44e91df8198666971f667fe850046d6",
+    "paper/v14_7/ICA2026_Japanese_revised_v14_7.pdf": "ac536d1e68f586d9bd2ecec239058fbe5c743795c8741d1c951941eb138c38cb",
+    "recalibration/finite_model.py": "e8da8a1892ca716ad567696486f0ada2606fdab54f609abbc9df932796b2ba31"
+  },
+  "primary_source_pdf_sha256": "60db09dd4bad76de7050134f23c53e649a9b152161174d16b2d68af04328e4ba"
+}

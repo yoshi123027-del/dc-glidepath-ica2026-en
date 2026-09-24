@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-15",
+  "source_commit": "028a9ff9d4a41adb10495b2d05ff7191ac971121",
+  "states": [
+    [
+      20,
+      20.0
+    ],
+    [
+      30,
+      45.0
+    ],
+    [
+      35,
+      30.0
+    ]
+  ],
+  "rolling_paths": 200000,
+  "rolling_blocks": 40,
+  "policy": "v8 fine unchanged",
+  "h": 0.1,
+  "dt": 0.08333333333333333,
+  "tail_method": "100 independent blocks; marginal approximate 95% intervals; no multiplicity correction",
+  "figure_style_source": "scripts/05_figures/localize_paper_figures_ja_20260717.py",
+  "heatmap": "full fixed wealth range; no reachable-probability envelope"
+}

@@ -1,0 +1,13 @@
+# Per-run files are retained in the four *_runs.zip archives.
+PCMV_*.npz
+PCMV_*.json
+PCMV_*_policy.csv
+DOMV_*.npz
+DOMV_*.json
+DOMV_*_policy.csv
+cTCMV_*.npz
+cTCMV_*.json
+cTCMV_*_policy.csv
+dTCMV_*.npz
+dTCMV_*.json
+dTCMV_*_policy.csv

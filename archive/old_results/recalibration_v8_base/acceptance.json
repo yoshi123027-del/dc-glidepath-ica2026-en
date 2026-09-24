@@ -1,0 +1,76 @@
+{
+  "status": "pass",
+  "calibration_mean_errors": {
+    "PCMV": 0.001713508515294393,
+    "DOMV": -0.0005573250472252766,
+    "cTCMV": -0.0014621208548533104,
+    "dTCMV": -0.000501134041911655,
+    "CP": -2.5947315407393035e-09
+  },
+  "calibration_tolerance": 0.01,
+  "simultaneous_mean_difference_margin": 0.1,
+  "simultaneous_confidence_approx": 0.95,
+  "intervals": [
+    {
+      "first": "PCMV",
+      "second": "DOMV",
+      "lower": -0.043344314108659424,
+      "upper": 0.03423508164492872
+    },
+    {
+      "first": "PCMV",
+      "second": "cTCMV",
+      "lower": -0.03514067047887979,
+      "upper": 0.030951938967971417
+    },
+    {
+      "first": "PCMV",
+      "second": "dTCMV",
+      "lower": -0.06851699007137318,
+      "upper": 0.06672618199602007
+    },
+    {
+      "first": "PCMV",
+      "second": "CP",
+      "lower": -0.07520752487776974,
+      "upper": 0.05344986638945867
+    },
+    {
+      "first": "DOMV",
+      "second": "cTCMV",
+      "lower": -0.010695846363706636,
+      "upper": 0.015616347316528948
+    },
+    {
+      "first": "DOMV",
+      "second": "dTCMV",
+      "lower": -0.053061017241917155,
+      "upper": 0.060379441630294683
+    },
+    {
+      "first": "DOMV",
+      "second": "CP",
+      "lower": -0.04868190195031952,
+      "upper": 0.036033475925739133
+    },
+    {
+      "first": "cTCMV",
+      "second": "dTCMV",
+      "lower": -0.04597807623357626,
+      "upper": 0.0483759996691315
+    },
+    {
+      "first": "cTCMV",
+      "second": "CP",
+      "lower": -0.04577372922753529,
+      "upper": 0.02820480225013259
+    },
+    {
+      "first": "dTCMV",
+      "second": "CP",
+      "lower": -0.036198310085614686,
+      "upper": 0.016231459672656767
+    }
+  ],
+  "scope": "Numerical finite-model optimality/equilibrium and off-grid statistical equivalence; not exact continuous-time optimality."
+}

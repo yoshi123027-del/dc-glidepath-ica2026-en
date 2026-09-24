@@ -1,0 +1,2 @@
+strategy,prob_weighted_region_agreement,prob_weighted_policy_mae,robust_interior_region_agreement,q95_difference,derivative_invalid_mass_share
+PCMV,0.9179409478637901,0.02818039009711884,1.0,0.10054681947011257,0.00032863575647579246

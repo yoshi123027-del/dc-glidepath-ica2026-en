@@ -1,0 +1,26 @@
+{
+  "base_commit": "db548f7b3904a1961bba2e6892f0a83ae7e94011",
+  "results": [
+    {
+      "kind": 0,
+      "parameter": 85.0,
+      "max_policy_error": 0.0,
+      "max_mean_error": 0.0,
+      "max_second_error": 0.0
+    },
+    {
+      "kind": 1,
+      "parameter": 0.03,
+      "max_policy_error": 0.0,
+      "max_mean_error": 0.0,
+      "max_second_error": 0.0
+    },
+    {
+      "kind": 2,
+      "parameter": 1.19,
+      "max_policy_error": 0.0,
+      "max_mean_error": 0.0,
+      "max_second_error": 0.0
+    }
+  ]
+}

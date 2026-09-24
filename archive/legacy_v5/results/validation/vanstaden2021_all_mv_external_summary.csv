@@ -1,0 +1,9 @@
+target_mean,model,method,testable_published_metrics,published_metrics_passed,mc_metrics_tested,mc_metrics_passed,overall_pass,max_abs_exact_minus_published_nonanchor
+125.0,PCMV,reflected_lognormal_closed_form,16,16,13,13,True,0.5080154509507508
+125.0,DOMV,normal_closed_form,16,16,13,13,True,0.4970023582345675
+125.0,cTCMV,normal_closed_form,16,16,13,13,True,0.48325270409475785
+125.0,dTCMV,lognormal_distribution_reconstruction,13,13,13,13,True,0.6596898712780472
+250.0,PCMV,reflected_lognormal_closed_form,16,16,13,13,True,0.7913776242744461
+250.0,DOMV,normal_closed_form,16,16,13,13,True,0.4656569276252185
+250.0,cTCMV,normal_closed_form,16,16,13,13,True,0.48474538197788775
+250.0,dTCMV,lognormal_distribution_reconstruction,13,13,13,13,True,0.4229444245842373
