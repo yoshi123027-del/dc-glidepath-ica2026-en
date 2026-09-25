@@ -1,17 +1,11 @@
 # Paper
 
-[`current/`](current/) はICA2026論文の参照版です。PDF、TeXソース、およびTeXから参照する図を同じ場所に収録しています。
+The current manuscript PDF is not distributed from this repository. This directory is retained only as a paper-related navigation point for the project.
 
-- [Current Japanese paper (PDF)](current/ICA2026_Japanese_revised_v15.pdf)
-- [TeX source](current/ICA2026_Japanese_revised_v15.tex)
-- [Figure files](current/figs/)
+For the reproducible numerical implementation and reported outputs, use:
 
-## Typesetting
+- [Numerical implementation](../recalibration/)
+- [Main reported results](../results/current/)
+- [Validation and robustness checks](../results/validation/)
 
-XeLaTeX、Latin Modern、Harano Ajiフォント、`xeCJK`を使用します。数値計算の再実行は不要です。
-
-```bash
-cd paper/current
-xelatex -interaction=nonstopmode -halt-on-error ICA2026_Japanese_revised_v15.tex
-xelatex -interaction=nonstopmode -halt-on-error ICA2026_Japanese_revised_v15.tex
-```
+The corresponding Japanese research repository is [`dc-glidepath-ica2026`](https://github.com/yoshi123027-del/dc-glidepath-ica2026).

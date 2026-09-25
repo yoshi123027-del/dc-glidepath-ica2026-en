@@ -6,4 +6,7 @@ pc_d0/
 sensitivity_workers/
 mvs_workers/
 results_v8/
-
+*.aux
+*.log
+*.out
+*.toc
