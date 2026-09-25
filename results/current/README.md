@@ -9,7 +9,7 @@ This directory contains the **authoritative saved numerical artefacts** underlyi
 | `independent_mc.csv` | Principal terminal-distribution statistics from the independent Euler–Monte Carlo evaluation |
 | `independent_mc.npz` | Terminal samples and mean glide paths from the independent Euler–Monte Carlo evaluation |
 | `paired_means.csv` | Supplementary paired mean differences based on common random numbers |
-| `fig_glidepaths_recalibrated_v12.png` | Current English mean-glide-path figure corresponding to the recalibrated policies |
+| `fig_glidepaths_recalibrated_v12_en.svg` | Current English mean-glide-path figure corresponding to the recalibrated policies |
 
 Expected terminal wealth is matched near 84.78. Wealth is expressed in the model's normalised units, with annual contribution equal to 1 and initial DC balance equal to 1/12.
 
