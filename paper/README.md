@@ -1,6 +1,6 @@
 # Paper
 
-The current manuscript PDF is not distributed from this repository. This directory is retained only as a paper-related navigation point for the project.
+This directory is retained only as a paper-related navigation point for the project.
 
 For the reproducible numerical implementation and reported outputs, use:
 
