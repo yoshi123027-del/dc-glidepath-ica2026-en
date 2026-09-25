@@ -1,10 +1,10 @@
 # MGH versus Independent Monte Carlo Evaluation of Identical Saved Policies
 
-This report summarises the differences between MGH forward evaluation and independent Euler–Monte Carlo evaluation while holding fixed the five policies used in the current paper.
+This report summarises the differences between MGH forward evaluation and independent Euler–Monte Carlo evaluation while holding fixed the five policies used in the ICA2026 manuscript.
 
 ## Results
 
-The policies, calibration coefficients, target of 84.78, and market assumptions are unchanged. The MGH evaluation uses forward probability-mass propagation over 480 months with wealth-grid spacing 0.1, 6,001 state points, and seven-point Gauss–Hermite quadrature. The Monte Carlo results use the one million paths underlying the paper. A verification run that regenerated every path with the same seed produced a maximum terminal-wealth difference of 5.90e-9 and a maximum mean-allocation difference below 1.63e-14. The saved Monte Carlo values used in the paper were not replaced.
+The policies, calibration coefficients, target of 84.78, and market assumptions are unchanged. The MGH evaluation uses forward probability-mass propagation over 480 months with wealth-grid spacing 0.1, 6,001 state points, and seven-point Gauss–Hermite quadrature. The Monte Carlo results use the one million paths underlying the manuscript. A verification run that regenerated every path with the same seed produced a maximum terminal-wealth difference of 5.90e-9 and a maximum mean-allocation difference below 1.63e-14. The saved Monte Carlo values used in the manuscript were not replaced.
 
 | Policy | Maximum CDF difference | Maximum glide-path difference (pp) | MAE (pp) | RMSE (pp) | Time of maximum difference (years) |
 |---|---:|---:|---:|---:|---:|
@@ -16,9 +16,9 @@ The policies, calibration coefficients, target of 84.78, and market assumptions 
 
 An allocation difference of 0.01 equals one percentage point (pp). The CP difference is numerical round-off and remains below 8.6e-12 pp.
 
-The signs below are **MGH minus MC**. Wealth is expressed in the same units as in the paper.
+The signs below are **MGH minus MC**. Wealth is expressed in the same normalised units as in the manuscript.
 
-| Policy | Mean difference | SD difference | q05 difference | Median difference | q95 difference | Lower 5% mean difference |
+| Policy | Mean difference | SD difference | 5th-percentile difference | Median difference | 95th-percentile difference | Mean-of-worst-5% difference |
 |---|---:|---:|---:|---:|---:|---:|
 | PCMV | -0.0042 | +0.0169 | -0.0937 | -0.0501 | +0.0754 | -0.0727 |
 | DOMV | +0.0030 | +0.0524 | -0.0690 | +0.0240 | +0.1398 | -0.1263 |
@@ -28,18 +28,18 @@ The signs below are **MGH minus MC**. Wealth is expressed in the same units as i
 
 - The terminal CDFs broadly overlap. PCMV has the largest maximum CDF difference, 0.008514 (approximately 0.8514 percentage points); the steps in its concentrated discrete CDF should also be taken into account.
 - dTCMV has the largest mean-glide-path difference, 0.5889 pp at 34.75 years. This is the difference obtained when the same policy is weighted by two different state distributions; it is not a change in the optimised policy.
-- dTCMV also has the largest SD and q95 differences, while its maximum CDF difference is the smallest of the five policies. No simple correspondence or causal relation between the glide-path and CDF discrepancies is claimed.
+- dTCMV also has the largest SD and 95th-percentile differences, while its maximum CDF difference is the smallest of the five policies. No simple correspondence or causal relation between the glide-path and CDF discrepancies is claimed.
 - CP provides a reference case: its mean glide paths coincide, but its terminal distributions still differ because of evaluator effects such as state discretisation and probability-mass allocation.
 - CP has an SD of 31.7442 under MGH and 31.6874 under MC, a relative difference of approximately 0.18%.
 - These findings do not change the principal Monte Carlo values, the main distributional patterns, or the design conclusions based on the decision principles. They also do not prove convergence to the continuous-time exact solution, global optimality, or a uniform error bound.
 
 ## Initialisation and numerical audits
 
-Following the definition in Appendix B of the paper, the exact initial balance of 1/12 is used and probability mass is assigned to the grid only after the first transition. This is explicitly distinguished from the two-point initial mass allocation used in `checks.py`.
+Following the definition used in the manuscript, the exact initial balance of 1/12 is used and probability mass is assigned to the grid only after the first transition. This is explicitly distinguished from the two-point initial mass allocation used in `checks.py`.
 
 The maximum monthly probability-mass error is below 2.2e-14; negative mass and lower-boundary mass are both zero. The largest upper-boundary mass is 6.43e-8 for CP and 3.16e-9 for dTCMV. Forward and backward first and second moments were checked, including the additional one-step variance induced by mass allocation. The Monte Carlo evaluation produced no paths above the state ceiling and no negative-balance steps.
 
-For the MGH lower 5% mean, probability mass at the boundary grid point is apportioned so that the tail contains exactly 5%. The maximum CDF difference is computed using both left and right limits over the full combined support rather than over the displayed plotting range. Separate small-example tests cover CDFs with atoms and fractional tail allocation.
+For the MGH mean of the worst 5%, probability mass at the boundary grid point is apportioned so that the tail contains exactly 5%. The maximum CDF difference is computed using both left and right limits over the full combined support rather than over the displayed plotting range. Separate small-example tests cover CDFs with atoms and fractional tail allocation.
 
 ## Reproduction
 
