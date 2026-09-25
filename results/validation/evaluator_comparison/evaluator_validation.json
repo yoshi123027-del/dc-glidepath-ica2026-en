@@ -1,0 +1,108 @@
+{
+  "seed": 20260912,
+  "paths": 1000000,
+  "blocks": 100,
+  "mc_source": "independent_mc.npz",
+  "mc_regenerated": true,
+  "initial_state": 0.08333333333333333,
+  "initial_transition": "exact initial state; risky dollars interpolation",
+  "mgh_h": 0.1,
+  "mgh_ng": 7,
+  "mc_upper_cap": false,
+  "policy_sha256": {
+    "PCMV.npz": "f31b54bf5221ead9d04adc33a12b350493e2c61577a99ddf0abc0590eb7ac822",
+    "PCMV.json": "e076906531d7ecc86d631772869687216ce03f5b7d821e84cb7e545e1b1b6262",
+    "DOMV.npz": "b9dd14f5d491dbbe3232c614d32d24750f1782c57156101fec81bce9273e0949",
+    "DOMV.json": "213079a706cc272e884406966ad57bc7591ca5c09b30dc3cbfaebd6408a619f6",
+    "cTCMV.npz": "b2158803c7aadeab828376b77e6ec057285bda644b28f42450084656b6d39fc3",
+    "cTCMV.json": "074e07c82f813e6c4f2263e1d5428b3b4eae59cf8562e814b86a2e64048a609c",
+    "dTCMV.npz": "1975f1c8f75f7384bd6fe6ba778be16a5b51af124d917bd34105a004f6518f2e",
+    "dTCMV.json": "3f28f20711bf5ae07243d3e46c017fdb408315a4ff2a51aa090b7b002cc6b951",
+    "CP.npz": "d563f85a702d9d62025596ff921bf6206ce424ad89ab1733939c77ffb89ce858",
+    "CP.json": "fae1400bb62d3d64ae4cad7d87ae095b63791b14e0b7e742d818950aaf097d3b",
+    "config.json": "6e20a9051554837e11f9e853716174d1899d917f728adbea0611655331f017b7",
+    "independent_mc.npz": "5b150d164c4fc6ee35edfd3cc9fdf19b36d6840f90bbacbc898347ee4fbeade0",
+    "independent_mc.csv": "3f3774906f83391b93fea945536a6fb253ac4bd07ac065f4328db11a241fdae7"
+  },
+  "strategies": {
+    "PCMV": {
+      "max_mass_error": 2.0872192862952943e-14,
+      "min_mass": 0.0,
+      "max_lower_mass": 0.0,
+      "max_upper_mass": 0.0,
+      "expected_upper_crossings": 0.0,
+      "expected_lower_crossings": 0.0,
+      "backward_mean": 84.76731099346648,
+      "backward_sd": 18.959329451912982,
+      "max_local_second_moment_error": 1.9472678677856514e-12
+    },
+    "DOMV": {
+      "max_mass_error": 2.0872192862952943e-14,
+      "min_mass": 0.0,
+      "max_lower_mass": 0.0,
+      "max_upper_mass": 9.804953754550714e-48,
+      "expected_upper_crossings": 7.956245920574489e-48,
+      "expected_lower_crossings": 0.0,
+      "backward_mean": 84.78611253966524,
+      "backward_sd": 24.466302116392235,
+      "max_local_second_moment_error": 2.066561982302928e-12
+    },
+    "cTCMV": {
+      "max_mass_error": 2.0872192862952943e-14,
+      "min_mass": 0.0,
+      "max_lower_mass": 0.0,
+      "max_upper_mass": 1.2002967455494417e-97,
+      "expected_upper_crossings": 8.924885437362495e-98,
+      "expected_lower_crossings": 0.0,
+      "backward_mean": 84.75415748455434,
+      "backward_sd": 23.14696730972962,
+      "max_local_second_moment_error": 2.13534962281714e-12
+    },
+    "dTCMV": {
+      "max_mass_error": 2.1316282072803006e-14,
+      "min_mass": 0.0,
+      "max_lower_mass": 0.0,
+      "max_upper_mass": 3.161338810670681e-09,
+      "expected_upper_crossings": 3.453225821778106e-09,
+      "expected_lower_crossings": 0.0,
+      "backward_mean": 84.73452435222923,
+      "backward_sd": 32.21801129224578,
+      "max_local_second_moment_error": 2.4624996052685644e-12
+    },
+    "CP": {
+      "max_mass_error": 2.042810365310288e-14,
+      "min_mass": 0.0,
+      "max_lower_mass": 0.0,
+      "max_upper_mass": 6.428570727140775e-08,
+      "expected_upper_crossings": 8.042536209272426e-07,
+      "expected_lower_crossings": 0.0,
+      "backward_mean": 84.7799928008689,
+      "backward_sd": 31.744182149750895,
+      "max_local_second_moment_error": 2.5344210237421283e-12
+    }
+  },
+  "mc_terminal_bitwise_reproduced": false,
+  "mc_terminal_max_reproduction_error": 5.899664756725542e-09,
+  "mc_glide_max_reproduction_error": 1.6209256159527285e-14,
+  "mc_cap_path_counts": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "mc_negative_step_counts": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "cp_theta": 0.46888421662151814,
+  "cp_max_deviation_mgh": 9.603429163007604e-15,
+  "cp_max_deviation_mc": 8.520961713998076e-14,
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5"
+  }
+}

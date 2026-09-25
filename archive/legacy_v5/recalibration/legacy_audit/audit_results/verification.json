@@ -1,0 +1,10 @@
+{
+  "theta_independent_ode_max_difference": 1.5862311464331924e-14,
+  "cp_grid_reproduced_mean": 84.77708496810119,
+  "cp_grid_reproduced_sd": 37.92726415185711,
+  "cp_normal_mean_zscore": -0.5160557876071189,
+  "cp_sd_relative_grid_error": 0.19499415039352508,
+  "tail_order_checks": "pass",
+  "linear_deposit_variance_identity": "pass",
+  "tests": "pass"
+}
