@@ -1,5 +1,5 @@
-# v9保存版
+# Archived v9 Manuscript
 
-[39ページPDF](paper/v9/ICA2026_Japanese_revised_v9.pdf)は2026年9月15日0:41保存の原稿です。v5ベースへの再構成前の版を保持しています。
+The [39-page PDF](paper/v9/ICA2026_Japanese_revised_v9.pdf) is the manuscript saved at 00:41 on 15 September 2026. It preserves the version immediately preceding the v5-based restructuring and remains in Japanese as a historical source artifact.
 
-追加分析は `results/v9/`、そのコードは `scripts/v9/`、図は `paper/v9/figs/` にあります。v9スクリプトは保存領域へ出力し、入力の最終fine方策はリポジトリルートの `results/recalibration_v8/fine/` を参照します。v11作成時にこれらの追加計算を再実行していません。
+Additional analyses are in `results/v9/`, their code is in `scripts/v9/`, and their figures are in `paper/v9/figs/`. The v9 scripts write to this archived area. Their original input paths referred to the then-current fine policies under `results/recalibration_v8/fine/`; those paths are historical and are not part of the current repository layout. These additional calculations were not rerun when v11 was prepared.

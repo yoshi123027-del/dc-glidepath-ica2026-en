@@ -2,8 +2,8 @@
 
 | Folder | Contents |
 |---|---|
-| [`recalibration/`](recalibration/) | MGH後退・前進整合性、連続制御の監査、格子・境界・GH求積の確認 |
-| [`evaluator_comparison/`](evaluator_comparison/) | 同一保存方策を用いるMGH前進と独立Euler–MCの比較 |
-| [`van_staden_2021/`](van_staden_2021/) | van Staden, Dang and Forsyth (2021) の外部ベンチマーク |
+| [`recalibration/`](recalibration/) | MGH backward–forward consistency, continuous-control audits, and grid, boundary, and GH-quadrature checks |
+| [`evaluator_comparison/`](evaluator_comparison/) | MGH forward versus independent Euler–MC comparison using identical saved policies |
+| [`van_staden_2021/`](van_staden_2021/) | External benchmark based on van Staden, Dang and Forsyth (2021) |
 
-主要な保存済み方策と論文結果は [`../current/`](../current/) にあります。
+The principal saved policies and paper results are in [`../current/`](../current/).

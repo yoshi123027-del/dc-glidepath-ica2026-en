@@ -1,18 +1,18 @@
 # Numerical implementation
 
-このディレクトリには、論文で用いる有限モデル、方策の最適化・再較正、分布評価、および検証用コードを収録しています。保存済みの主要結果は [`../results/current/`](../results/current/)、検証結果は [`../results/validation/`](../results/validation/) にあります。
+This directory contains the finite model, policy optimisation and recalibration routines, distribution evaluators, and validation code used in the paper. The principal saved results are in [`../results/current/`](../results/current/), and validation outputs are in [`../results/validation/`](../results/validation/).
 
 ## Code map
 
 | File or folder | Role |
 |---|---|
-| `finite_model.py` | 共通の有限モデル、MGH遷移核、PCMV・cTCMV・dTCMVの計算基盤 |
-| `run.py` | 方策の最適化と共通期待終価への再較正 |
-| `validate.py` | 保存済み方策の独立Euler–Monte Carlo評価 |
-| `checks.py`, `acceptance.py`, `dom_diagnostics.py` | 後退・前進整合性、受入判定、DOMVの診断 |
-| `sensitivity.py` | 格子、GH求積、上限境界に関する頑健性確認 |
-| `evaluator_comparison.py`, `plot_evaluator_comparison.py` | 同一方策に対するMGH前進と独立Euler–MCの比較 |
-| `external_vanstaden_2021/` | van Staden, Dang and Forsyth (2021) に基づく外部ベンチマーク |
+| `finite_model.py` | Common finite model, MGH transition kernel, and computational basis for PCMV, cTCMV, and dTCMV |
+| `run.py` | Policy optimisation and recalibration to a common expected terminal wealth |
+| `validate.py` | Independent Euler–Monte Carlo evaluation of saved policies |
+| `checks.py`, `acceptance.py`, `dom_diagnostics.py` | Backward–forward consistency checks, acceptance decisions, and DOMV diagnostics |
+| `sensitivity.py` | Robustness checks for the state grid, GH quadrature, and upper boundary |
+| `evaluator_comparison.py`, `plot_evaluator_comparison.py` | MGH forward versus independent Euler–MC comparison for identical policies |
+| `external_vanstaden_2021/` | External benchmark based on van Staden, Dang and Forsyth (2021) |
 
 ## Results and validation
 

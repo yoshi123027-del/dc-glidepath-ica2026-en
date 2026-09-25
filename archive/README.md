@@ -1,12 +1,12 @@
 # Archive
 
-この領域には、現在の論文読者が通常参照する必要のない過去資料を保存しています。
+This area preserves historical materials that readers of the current paper do not normally need to consult.
 
 | Folder | Contents |
 |---|---|
-| [`papers/`](papers/) | 過去の論文版と対応する図・補助資料 |
-| [`legacy_v5/`](legacy_v5/) | 旧計算、旧コード、監査記録、原稿 |
-| [`old_results/`](old_results/) | 現在の論文では採用していない旧格子・旧数値出力 |
-| [`exploratory/`](exploratory/) | 探索的分析、manifest、旧自動化資料、自己完結した履歴パッケージ |
+| [`papers/`](papers/) | Earlier manuscript versions and their figures and supporting materials |
+| [`legacy_v5/`](legacy_v5/) | Legacy calculations, code, audit records, and manuscript |
+| [`old_results/`](old_results/) | Superseded grids and numerical outputs not used in the current paper |
+| [`exploratory/`](exploratory/) | Exploratory analyses, manifests, retired automation assets, and self-contained historical packages |
 
-現在の論文、主要結果、再現用コードはリポジトリ上位の `paper/current/`、`results/current/`、`recalibration/` を参照してください。
+For the current paper, principal results, and reproduction code, use the top-level [`paper/current/`](../paper/current/), [`results/current/`](../results/current/), and [`recalibration/`](../recalibration/) directories. Archived Japanese manuscripts and revision notes are retained in their original language as historical source artifacts.

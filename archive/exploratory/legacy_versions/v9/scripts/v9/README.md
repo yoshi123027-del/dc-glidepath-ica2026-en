@@ -1,8 +1,8 @@
-> v9作成時の記録です。現在の保存場所と最新版はリポジトリのREADMEを参照してください。
+> This is a record from the preparation of v9. See the repository README for the current layout and reference version.
 
-# v9追加分析・作図
+# Additional v9 Analyses and Figures
 
-リポジトリのルートから実行します。
+The commands below are the historical v9 commands. Run them from the archived v9 root (`archive/exploratory/legacy_versions/v9`) only after adapting the input path described below.
 
 ```text
 python -m pip install -r requirements.txt
@@ -11,10 +11,10 @@ python scripts/v9/v9_targets.py
 python scripts/v9/v9_legacy_figures.py
 ```
 
-入力は`results/recalibration_v8/fine/`、集計出力は`results/v9/`、図は`paper/v9/figs/`です。方策の再最適化は行いません。最初のコマンドは3つの共通状態を各20万経路で評価します。
+The original inputs were in `results/recalibration_v8/fine/`; summary outputs were written to `results/v9/`, and figures to `paper/v9/figs/`. The policies were not re-optimised. The first command evaluated three common states using 200,000 paths per state. The original input directory is not part of the current repository layout, so these scripts are retained for auditability rather than as the current reproduction route.
 
-日本語フォントはWindowsのMeiryo、LinuxのNoto Sans CJK、`fonts/NotoSansCJKjp-Regular.otf`から選びます。別のフォントは環境変数`ICA_JAPANESE_FONT`にファイルパスを設定してください。
+For the archived Japanese-labelled figures, the scripts select Meiryo on Windows, Noto Sans CJK on Linux, or `fonts/NotoSansCJKjp-Regular.otf`. Set the `ICA_JAPANESE_FONT` environment variable to use another font file.
 
-旧監査図だけは`archive/v8/paper/ICA2026_Japanese_revised_v8.tex`に記録された座標を読みます。新方策のデータとは分離しています。再生成はTeX内の数表を自動変更しません。
+The legacy audit figures alone read coordinates recorded in the archived v8 TeX source. Those coordinates are separate from the newer policy data. Regenerating the figures does not modify the numerical tables in the TeX source.
 
-完全な再最適化は[recalibration/README.md](../../recalibration/README.md)を参照してください。
+For the current optimisation and validation workflow, see the top-level [recalibration guide](../../../../../../recalibration/README.md).
